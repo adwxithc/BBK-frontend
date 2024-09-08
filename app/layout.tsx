@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Righteous } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const righteous = Righteous({
+  subsets: ["latin"], // Specify the subset 
+  weight: "400", // Righteous only has one weight, which is 400
+  display: "swap", // Optional: 'swap' ensures text is visible during loading
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={righteous.className}>{children}</body>
     </html>
   );
 }
