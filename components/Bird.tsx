@@ -5,7 +5,7 @@ import animationData from "@/data/bird-animation.json";
 import { useWindowSize } from "react-use";
 import { useRef, useState, useMemo, useEffect } from "react";
 
-export default function HomePage() {
+export default function Bird() {
     // Memoize the Lottie options to avoid recalculating on every render
     const defaultOptions = useMemo(
         () => ({
@@ -62,31 +62,14 @@ export default function HomePage() {
         prevXRef1.current = x;
     });
 
-
     return (
-        <div>
-            {/* Hero Section */}
-            <section className="relative h-screen bg-blue-200 flex justify-center items-center">
-                {/* Bird (parallax effect with Framer Motion) */}
-                <motion.div
-                    className="absolute top-10 left-10"
-                    style={{ x: birdX, y: birdY }} // Apply both horizontal and vertical scroll animation
-                >
-                    <Lottie options={defaultOptions} style={{ scale: 1, transform: transformStyle }} height={100} width={100} />
-                </motion.div>
 
-                <h1 className="text-4xl font-bold text-white">Welcome to Our Play School</h1>
-            </section>
-
-            {/* Second Section */}
-            <section className="h-screen bg-yellow-300 flex justify-center items-center">
-                <h2 className="text-3xl font-bold">Explore Our Programs</h2>
-            </section>
-
-            {/* Third Section */}
-            <section className="h-screen bg-green-200 flex justify-center items-center">
-                <h2 className="text-3xl font-bold">Meet Our Teachers</h2>
-            </section>
-        </div>
-    );
+        < motion.div
+            className="absolute z-40"
+            style={{ x: birdX, y: birdY }
+            } // Apply both horizontal and vertical scroll animation
+        >
+            <Lottie options={defaultOptions} style={{ scale: 1.5, transform: transformStyle }} height={100} width={100} />
+        </motion.div >
+    )
 }

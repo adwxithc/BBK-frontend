@@ -7,7 +7,7 @@ function Hero() {
         <main className="w-full">
             <main className="bg-primary pt-36 ">
                 <Container className=" flex sm:flex-row flex-col">
-                    <div className="flex-1  text-white/90">
+                    <div className="flex-1  text-white/90 ">
                         <div>
                             <Image className="opacity-40" width={50} height={50} src="/hero4.webp" alt="" />
                         </div>

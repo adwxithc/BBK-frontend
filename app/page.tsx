@@ -1,6 +1,6 @@
 import AboutUs from "@/components/AboutUs";
+import Bird from "@/components/Bird";
 import Hero from "@/components/Hero";
-import HomePage from "@/components/Home";
 import Navbar from "@/components/ui/Navbar";
 
 
@@ -8,6 +8,7 @@ import Navbar from "@/components/ui/Navbar";
 export default function Home() {
   return (
     <main className="relative bg-background" >
+      <Bird />
       <Navbar />
       <Hero />
       <AboutUs /> 
