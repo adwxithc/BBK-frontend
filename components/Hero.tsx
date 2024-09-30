@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Container from "./Container"
+import Bird from "./Bird"
 
 
 function Hero() {
@@ -11,7 +12,7 @@ function Hero() {
                         <div>
                             <Image className="opacity-40" width={50} height={50} src="/hero4.webp" alt="" />
                         </div>
-
+                        {/* <Bird /> */}
                         <h1 className="text-5xl mb-3 max-w-lg">Welcome to Bunny Babies</h1>
                         <p className="font-thin text-white/80 max-w-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, atque, eaque est quae quisquam itaque fugiat delectus officiis, veritatis sit earum ut harum eius! Beatae iste dicta pariatur obcaecati voluptatum.</p>
                     </div>

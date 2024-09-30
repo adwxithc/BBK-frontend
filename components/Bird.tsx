@@ -30,7 +30,7 @@ export default function Bird() {
     const birdX = useTransform(scrollYProgress, [0, 0.33, 0.66, 1], [0, maxXMovement, 0, maxXMovement]);
 
     // Vertical movement: Bird moves down as we scroll through the sections
-    const birdY = useTransform(scrollYProgress, [0, 0.33, 0.66, 1], [0, 500, 1000, 1500]);
+    const birdY = useTransform(scrollYProgress, [0, 0.33, 0.66, 1], [0, 400, 800, 1000]);
 
     // Ref to store previous X position
     const prevXRef1 = useRef(0);
@@ -69,7 +69,7 @@ export default function Bird() {
             style={{ x: birdX, y: birdY }
             } // Apply both horizontal and vertical scroll animation
         >
-            <Lottie options={defaultOptions} style={{ scale: 1.5, transform: transformStyle }} height={100} width={100} />
+            <Lottie options={defaultOptions} style={{ scale: 1.2, transform: transformStyle }} height={100} width={100} />
         </motion.div >
     )
 }
