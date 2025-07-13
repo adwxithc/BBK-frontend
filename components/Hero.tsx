@@ -1,22 +1,24 @@
 import Image from "next/image"
 import Container from "./Container"
-import Bird from "./Bird"
+
 
 
 function Hero() {
     return (
         <main className="w-full">
-            <main className="bg-primary pt-36 ">
+            <main className="bg-primary pt-28 sm:pt-36 ">
                 <Container className=" flex sm:flex-row flex-col">
-                    <div className="flex-1  text-white/90 ">
-                        <div>
-                            <Image className="opacity-40" width={50} height={50} src="/hero4.webp" alt="" />
-                        </div>
-                        {/* <Bird /> */}
-                        <h1 className="text-5xl mb-3 max-w-lg">Welcome to Bunny Babies</h1>
-                        <p className="font-thin text-white/80 max-w-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, atque, eaque est quae quisquam itaque fugiat delectus officiis, veritatis sit earum ut harum eius! Beatae iste dicta pariatur obcaecati voluptatum.</p>
+                    <div className="flex-1  text-white/90 text-center sm:text-left relative">
+
+                        <Image className="opacity-40 absolute -top-5 -left-5 sm:static" width={50} height={50} src="/hero4.webp" alt="" />
+
+                        <h1 className="text-4xl sm:text-5xl mb-3 max-w-lg ">Welcome to Bunny Babies</h1>
+                        <p className="text-sm sm:text-base font-[300] text-white/80 max-w-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, atque, eaque est quae quisquam itaque fugiat delectus officiis, veritatis sit earum ut harum eius! Beatae iste dicta pariatur obcaecati voluptatum.</p>
                     </div>
-                    <div className="flex-1 grid grid-cols-2 gap-5 p-5">
+                    <div className="flex-1 p-5 sm:hidden flex justify-center items-center">
+                        <Image width={500} height={500} src="/hero3.webp" alt="kids" className="w-100% h-100%" />
+                    </div>
+                    <div className="flex-1 grid-cols-2 gap-5 p-5 hidden sm:grid">
                         <div className=" ">
                             <Image className="ml-auto" width={300} height={300} src="/hero2.webp" alt="" />
                         </div>
@@ -45,7 +47,7 @@ function Hero() {
             </div>
             <div className="h-16 w-full bg-background">
             </div>
-            
+
         </main>
     )
 }

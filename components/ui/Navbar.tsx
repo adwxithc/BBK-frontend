@@ -76,7 +76,7 @@ const Navbar = () => {
                 </div>
             </div>
 
-            <div className='w-full  z-10 relative -top-1 xl:-top-2 '>
+            <div className='w-full  z-10 relative -top-1 xl:-top-2 overflow-hidden'>
                 <Image width={1200} height={50} layout="responsive"
                  src="/melting.webp" alt="melting ice" />
             </div>
