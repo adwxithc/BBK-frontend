@@ -13,7 +13,7 @@ function Hero() {
                         <Image className="opacity-40 absolute -top-5 -left-5 sm:static" width={50} height={50} src="/hero4.webp" alt="" />
 
                         <h1 className="text-4xl sm:text-5xl mb-3 max-w-lg ">Welcome to Bunny Babies</h1>
-                        <p className="text-sm sm:text-base font-[300] text-white/80 max-w-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, atque, eaque est quae quisquam itaque fugiat delectus officiis, veritatis sit earum ut harum eius! Beatae iste dicta pariatur obcaecati voluptatum.</p>
+                        <p className="text-sm sm:text-base font-light  text-white/90 max-w-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, atque, eaque est quae quisquam itaque fugiat delectus officiis, veritatis sit earum ut harum eius! Beatae iste dicta pariatur obcaecati voluptatum.</p>
                     </div>
                     <div className="flex-1 p-5 sm:hidden flex justify-center items-center">
                         <Image width={500} height={500} src="/hero3.webp" alt="kids" className="w-100% h-100%" />

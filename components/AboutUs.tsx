@@ -15,7 +15,7 @@ function AboutUs() {
                 <div className="flex-1 pl-3 text-center sm:text-left ">
                     <h3 className="mb-5 text-xl font-semibold">About Us</h3>
                     <h1 className="text-3xl mb-3">Some Heading for the about section</h1>
-                    <p>
+                    <p className="font-light text-lg">
                         Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum deserunt ad dolor illum recusandae assumenda id. Quidem, repellendus labore tempora voluptate architecto impedit, sequi doloremque, in tenetur ut ducimus hic!
                         lit. Alias asperiores eos quasi vitae illum, consequatur natus veritatis fuga optio laudantium debitis nam quas illo. Sapiente aliquam nostrum ullam quis amet?
                     </p>
