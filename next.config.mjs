@@ -11,7 +11,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Temporarily disabled - requires critters dependency
     optimizePackageImports: ['lucide-react'],
   },
   compiler: {

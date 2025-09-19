@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import Container from "@/components/Container";
-import { MoveLeft, Calendar, MapPin, Users, Star } from "lucide-react";
+import { MoveLeft } from "lucide-react";
 import LightGallery from "lightgallery/react";
 import lgThumbnail from "lightgallery/plugins/thumbnail";
 import lgZoom from "lightgallery/plugins/zoom";
@@ -162,11 +163,12 @@ export default function EventGalleryPage() {
                                 className="group relative block bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                             >
                                 <div className="relative aspect-square overflow-hidden">
-                                    <img
+                                    <Image
                                         src={src}
                                         alt={`${galleryInfo.title} moment ${index + 1}`}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        loading="lazy"
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                                     />
                                     
                                     {/* Overlay */}
