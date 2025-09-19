@@ -2,7 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global Mobile Optimizations */
+@layer base {
+  /* Improve touch targets for mobile */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better text readability and smooth scrolling */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Better focus states for accessibility */
+  *:focus {
+    outline: 2px solid #7CBD1E;
+    outline-offset: 2px;
+  }
+}
 
+@layer utilities {
+  /* Touch-friendly utility class */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+}
 
 .custom-shape-divider-top-1725787380 .shape-fill {
     fill: #7CBD1E;

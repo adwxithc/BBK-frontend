@@ -22,57 +22,57 @@ function Hero() {
                 </div>
             </div>
 
-            <main className="bg-gradient-to-br from-primary-500 via-primary-400 to-secondary-400 pt-28 sm:pt-36 relative z-10">
-                <Container className="flex sm:flex-row flex-col items-center min-h-[80vh]">
-                    <div className="flex-1 text-white text-center sm:text-left relative z-20">
-                        {/* Fun decorative element */}
+            <main className="bg-gradient-to-br from-primary-500 via-primary-400 to-secondary-400 pt-24 sm:pt-28 md:pt-32 lg:pt-36 relative z-10">
+                <Container className="flex flex-col lg:flex-row items-center min-h-[80vh] gap-8 lg:gap-12 px-4 sm:px-0">
+                    <div className="flex-1 text-white text-center lg:text-left relative z-20">
+                        {/* Fun decorative element - Mobile responsive */}
                         <div className="inline-block mb-4 relative">
-                            <div className="absolute -top-2 -left-2 w-8 h-8 bg-secondary-300 rounded-full animate-ping"></div>
+                            <div className="absolute -top-2 -left-2 w-6 h-6 sm:w-8 sm:h-8 bg-secondary-300 rounded-full animate-ping"></div>
                             <Image
                                 className="relative z-10 drop-shadow-lg"
-                                width={60}
-                                height={60}
+                                width={50}
+                                height={50}
                                 src="/hero4.webp"
                                 alt="Bunny mascot"
                                 priority
-                                sizes="60px"
+                                sizes="50px"
                             />
                         </div>
 
-                        <h1 className="text-4xl sm:text-6xl lg:text-7xl mb-6 max-w-2xl font-bold leading-tight">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 max-w-2xl font-bold leading-tight">
                             <span className="block text-white drop-shadow-md">Welcome to</span>
                             <span className="block bg-gradient-to-r from-secondary-200 to-warm-300 bg-clip-text text-transparent drop-shadow-lg">
                                 Bunny Babies
                             </span>
                         </h1>
 
-                        <p className="text-lg sm:text-xl font-medium text-white/95 max-w-xl mb-8 leading-relaxed drop-shadow-sm">
+                        <p className="text-base sm:text-lg md:text-xl font-medium text-white/95 max-w-xl mb-8 leading-relaxed drop-shadow-sm">
                             Where little hearts learn, grow, and discover the magic of childhood in a safe, nurturing environment filled with joy and wonder.
                         </p>
 
-                        {/* Call-to-action buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                            <button className="bg-white text-primary-500 px-8 py-4 rounded-full font-bold text-lg hover:bg-secondary-100 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        {/* Call-to-action buttons - Mobile optimized */}
+                        <div className="flex flex-col sm:flex-row gap-4 mb-8 w-full max-w-lg mx-auto lg:mx-0">
+                            <button className="w-full sm:w-auto bg-white text-primary-500 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:bg-secondary-100 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
                                 🌟 Enroll Today
                             </button>
-                            <button className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-primary-500 transform hover:scale-105 transition-all duration-300">
+                            <button className="w-full sm:w-auto border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:bg-white hover:text-primary-500 transform hover:scale-105 transition-all duration-300">
                                 📅 Schedule Tour
                             </button>
                         </div>
 
-                        {/* Trust indicators */}
-                        <div className="flex flex-wrap items-center gap-6 text-white/90">
+                        {/* Trust indicators - Mobile optimized */}
+                        <div className="flex flex-wrap justify-center lg:justify-start items-center gap-4 sm:gap-6 text-white/90 text-sm">
                             <div className="flex items-center gap-2">
-                                <span className="text-2xl">🏆</span>
-                                <span className="text-sm font-medium">Licensed & Certified</span>
+                                <span className="text-xl sm:text-2xl">🏆</span>
+                                <span className="font-medium">Licensed & Certified</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-2xl">❤️</span>
-                                <span className="text-sm font-medium">10+ Years Experience</span>
+                                <span className="text-xl sm:text-2xl">❤️</span>
+                                <span className="font-medium">10+ Years Experience</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-2xl">👨‍👩‍👧‍👦</span>
-                                <span className="text-sm font-medium">Happy Families</span>
+                                <span className="text-xl sm:text-2xl">👨‍👩‍👧‍👦</span>
+                                <span className="font-medium">Happy Families</span>
                             </div>
                         </div>
                     </div>
@@ -93,8 +93,8 @@ function Hero() {
                         </div>
                     </div>
 
-                    {/* Desktop image grid */}
-                    <div className="flex-1 grid-cols-2 gap-6 p-5 hidden sm:grid relative">
+                    {/* Desktop image grid - Mobile optimized */}
+                    <div className="flex-1 grid-cols-2 gap-4 lg:gap-6 p-3 lg:p-5 hidden sm:grid relative">
                         <div className="relative group">
                             <div className="absolute -inset-2 bg-gradient-to-r from-secondary-300/50 to-warm-300/50 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <Image
@@ -104,7 +104,7 @@ function Hero() {
                                 src="/hero2.webp"
                                 alt="Children learning"
                                 priority
-                                sizes="(min-width: 640px) 280px, 0px"
+                                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 0px"
                             />
                         </div>
                         <div className="relative group">
@@ -116,7 +116,7 @@ function Hero() {
                                 src="/hero3.webp"
                                 alt="Happy kids"
                                 loading="lazy"
-                                sizes="(min-width: 640px) 200px, 0px"
+                                sizes="(min-width: 1024px) 200px, (min-width: 640px) 160px, 0px"
                             />
                         </div>
                         <div className="relative group">
@@ -128,7 +128,7 @@ function Hero() {
                                 src="/hero4.webp"
                                 alt="Bunny mascot"
                                 loading="lazy"
-                                sizes="(min-width: 640px) 150px, 0px"
+                                sizes="(min-width: 1024px) 150px, (min-width: 640px) 120px, 0px"
                             />
                         </div>
                         <div className="relative group">
@@ -140,7 +140,7 @@ function Hero() {
                                 src="/hero1.webp"
                                 alt="Playful activities"
                                 loading="lazy"
-                                sizes="(min-width: 640px) 280px, 0px"
+                                sizes="(min-width: 1024px) 280px, (min-width: 640px) 220px, 0px"
                             />
                         </div>
                     </div>
