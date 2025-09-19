@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
 import "./globals.css";
+import StoreProvider from "@/lib/StoreProvider";
 
 const lexend = Lexend({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"], 
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   display: "swap"
 });
 
@@ -20,7 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={lexend.className}>{children}</body>
+      <body className={lexend.className}>
+        <StoreProvider>{children}</StoreProvider></body>
     </html>
   );
 }
