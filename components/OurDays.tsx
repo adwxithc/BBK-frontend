@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback, useMemo, memo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Container from './Container';
-import { Play, X, Camera, Video, Heart, Star } from 'lucide-react';
+import { Camera, Heart, Star } from 'lucide-react';
 
 interface MediaItem {
   id: number;
@@ -13,6 +14,7 @@ interface MediaItem {
   title: string;
   description: string;
   category: string;
+  galleryRoute: string;
 }
 
 // Sample media data
@@ -23,7 +25,8 @@ const mediaItems: MediaItem[] = [
     src: '/hero1.webp',
     title: 'Art & Creativity Time',
     description: 'Children exploring their artistic side with colorful paints and crafts',
-    category: 'Creative Arts'
+    category: 'Creative Arts',
+    galleryRoute: 'art-creativity'
   },
   {
     id: 2,
@@ -31,7 +34,8 @@ const mediaItems: MediaItem[] = [
     src: '/hero2.webp',
     title: 'Learning Through Play',
     description: 'Interactive learning sessions that make education fun and engaging',
-    category: 'Educational Play'
+    category: 'Educational Play',
+    galleryRoute: 'educational-play'
   },
   {
     id: 3,
@@ -39,7 +43,8 @@ const mediaItems: MediaItem[] = [
     src: '/hero3.webp',
     title: 'Happy Moments',
     description: 'Capturing the joy and laughter that fills our classrooms every day',
-    category: 'Daily Life'
+    category: 'Daily Life',
+    galleryRoute: 'daily-life'
   },
   {
     id: 4,
@@ -47,7 +52,8 @@ const mediaItems: MediaItem[] = [
     src: '/Group 12.webp',
     title: 'Group Activities',
     description: 'Building friendships and social skills through collaborative activities',
-    category: 'Social Development'
+    category: 'Social Development',
+    galleryRoute: 'social-development'
   },
   {
     id: 5,
@@ -55,24 +61,24 @@ const mediaItems: MediaItem[] = [
     src: '/kids.png',
     title: 'Outdoor Adventures',
     description: 'Fresh air and physical activities for healthy development',
-    category: 'Outdoor Play'
+    category: 'Outdoor Play',
+    galleryRoute: 'outdoor-play'
   },
   {
     id: 6,
     type: 'image',
     src: '/hero4.webp',
-    title: 'Storytime Magic',
-    description: 'Developing language skills through engaging storytelling sessions',
-    category: 'Literature'
+    title: 'Christmas Celebration',
+    description: 'Festive joy and holiday spirit with our Christmas celebrations',
+    category: 'Special Events',
+    galleryRoute: 'christmas'
   }
 ];
 
-const categories = ['All', 'Creative Arts', 'Educational Play', 'Daily Life', 'Social Development', 'Outdoor Play', 'Literature'];
+const categories = ['All', 'Creative Arts', 'Educational Play', 'Daily Life', 'Social Development', 'Outdoor Play', 'Special Events'];
 
 function OurDays() {
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredMedia = useMemo(() => 
     selectedCategory === 'All' 
@@ -80,16 +86,6 @@ function OurDays() {
       : mediaItems.filter(item => item.category === selectedCategory),
     [selectedCategory]
   );
-
-  const openModal = useCallback((media: MediaItem) => {
-    setSelectedMedia(media);
-    setIsModalOpen(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedMedia(null);
-  }, []);
 
   return (
     <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20 relative overflow-hidden">
@@ -145,108 +141,93 @@ function OurDays() {
         </div>
 
         {/* Media Grid */}
-        <MediaGrid filteredMedia={filteredMedia} openModal={openModal} />
+        <MediaGrid filteredMedia={filteredMedia} />
 
         {/* Call to Action */}
         <CallToAction />
       </Container>
-
-      {/* Modal for viewing media */}
-      <MediaModal 
-        isModalOpen={isModalOpen}
-        selectedMedia={selectedMedia}
-        onClose={closeModal}
-      />
     </div>
   );
 }
 
 // Memoized MediaGrid Component
-const MediaGrid = memo(({ filteredMedia, openModal }: {
+const MediaGrid = memo(({ filteredMedia }: {
   filteredMedia: MediaItem[];
-  openModal: (item: MediaItem) => void;
 }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
     {filteredMedia.map((item, index) => (
-      <MediaCard key={item.id} item={item} index={index} onClick={openModal} />
+      <MediaCard key={item.id} item={item} index={index} />
     ))}
   </div>
 ));
 MediaGrid.displayName = 'MediaGrid';
 
 // Memoized MediaCard Component
-const MediaCard = memo(({ item, index, onClick }: {
+const MediaCard = memo(({ item, index }: {
   item: MediaItem;
   index: number;
-  onClick: (item: MediaItem) => void;
 }) => (
-  <div
-    className="group relative bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
-    style={{ animationDelay: `${index * 100}ms` }}
-  >
-    {/* Media Container */}
-    <div className="relative aspect-square overflow-hidden">
-      <Image
-        src={item.src}
-        alt={item.title}
-        fill
-        className="object-cover transition-transform duration-500 group-hover:scale-110"
-        loading="lazy"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      />
-      
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
-      {/* Play button for videos */}
-      {item.type === 'video' && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-            <Play className="w-8 h-8 text-[#7CBD1E] ml-1" />
+  <Link href={`/gallery/${item.galleryRoute}`} className="block">
+    <div
+      className="group relative bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 cursor-pointer"
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      {/* Media Container */}
+      <div className="relative aspect-square overflow-hidden">
+        <Image
+          src={item.src}
+          alt={item.title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        
+        {/* View Gallery Icon */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+            <Camera className="w-8 h-8 text-[#7CBD1E]" />
           </div>
         </div>
-      )}
-      
-      {/* Media type indicator */}
-      <div className="absolute top-4 right-4">
-        <div className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md">
-          {item.type === 'image' ? (
+        
+        {/* Media type indicator */}
+        <div className="absolute top-4 right-4">
+          <div className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md">
             <Camera className="w-4 h-4 text-[#7CBD1E]" />
-          ) : (
-            <Video className="w-4 h-4 text-pink-500" />
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Click overlay */}
-      <button
-        onClick={() => onClick(item)}
-        className="absolute inset-0 w-full h-full focus:outline-none focus:ring-4 focus:ring-[#7CBD1E]/50"
-        aria-label={`View ${item.title}`}
-      />
-    </div>
-
-    {/* Content */}
-    <div className="p-6">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs font-bold text-[#7CBD1E] bg-[#7CBD1E]/10 px-3 py-1 rounded-full">
-          {item.category}
-        </span>
-        <div className="flex items-center gap-1">
-          <Heart className="w-4 h-4 text-pink-400" />
-          <Star className="w-4 h-4 text-yellow-400" />
+      {/* Content */}
+      <div className="p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs font-bold text-[#7CBD1E] bg-[#7CBD1E]/10 px-3 py-1 rounded-full">
+            {item.category}
+          </span>
+          <div className="flex items-center gap-1">
+            <Heart className="w-4 h-4 text-pink-400" />
+            <Star className="w-4 h-4 text-yellow-400" />
+          </div>
+        </div>
+        
+        <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#7CBD1E] transition-colors duration-300">
+          {item.title}
+        </h3>
+        
+        <p className="text-gray-600 text-sm leading-relaxed mb-4">
+          {item.description}
+        </p>
+        
+        <div className="flex items-center text-[#7CBD1E] text-sm font-medium">
+          <span>View Gallery</span>
+          <Camera className="w-4 h-4 ml-2" />
         </div>
       </div>
-      
-      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#7CBD1E] transition-colors duration-300">
-        {item.title}
-      </h3>
-      
-      <p className="text-gray-600 text-sm leading-relaxed">
-        {item.description}
-      </p>
     </div>
-  </div>
+  </Link>
 ));
 MediaCard.displayName = 'MediaCard';
 
@@ -274,64 +255,5 @@ const CallToAction = memo(() => (
   </div>
 ));
 CallToAction.displayName = 'CallToAction';
-
-// Memoized MediaModal Component
-const MediaModal = memo(({ isModalOpen, selectedMedia, onClose }: {
-  isModalOpen: boolean;
-  selectedMedia: MediaItem | null;
-  onClose: () => void;
-}) => {
-  if (!isModalOpen || !selectedMedia) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="relative max-w-4xl w-full max-h-[90vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-200 transform hover:scale-110"
-        >
-          <X className="w-6 h-6 text-gray-600" />
-        </button>
-
-        {/* Media display */}
-        <div className="relative aspect-video">
-          <Image
-            src={selectedMedia.src}
-            alt={selectedMedia.title}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-
-        {/* Media info */}
-        <div className="p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm font-bold text-[#7CBD1E] bg-[#7CBD1E]/10 px-3 py-1 rounded-full">
-              {selectedMedia.category}
-            </span>
-            <div className="flex items-center gap-1">
-              {selectedMedia.type === 'image' ? (
-                <Camera className="w-4 h-4 text-[#7CBD1E]" />
-              ) : (
-                <Video className="w-4 h-4 text-pink-500" />
-              )}
-            </div>
-          </div>
-          
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">
-            {selectedMedia.title}
-          </h3>
-          
-          <p className="text-gray-600 leading-relaxed">
-            {selectedMedia.description}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-});
-MediaModal.displayName = 'MediaModal';
 
 export default OurDays;

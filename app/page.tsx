@@ -13,10 +13,6 @@ const OurPrograms = dynamic(() => import("@/components/OurPrograms"), {
   ssr: true
 });
 
-const Gallery = dynamic(() => import("@/components/Gallery"), {
-  loading: () => <ComponentSkeleton />,
-  ssr: true
-});
 
 const OurDays = dynamic(() => import("@/components/OurDays"), {
   loading: () => <ComponentSkeleton />,
@@ -62,7 +58,6 @@ export default function Home() {
 
       <AboutUs />
       <OurPrograms />
-      <Gallery />
       <OurDays />
     </main>
   );
