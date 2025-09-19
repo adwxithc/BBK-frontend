@@ -3,6 +3,7 @@ import Features from "@/components/Features";
 import Gallery from "@/components/Gallery";
 import Hero from "@/components/Hero";
 import OurPrograms from "@/components/OurPrograms";
+import OurDays from "@/components/OurDays";
 import Navbar from "@/components/ui/Navbar";
 
 
@@ -16,6 +17,7 @@ export default function Home() {
       <AboutUs />
       <OurPrograms />
       <Gallery />
+      <OurDays />
       {/* <Features /> */}
     </main>
   );
