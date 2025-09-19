@@ -34,6 +34,8 @@ function Hero() {
                                 height={60} 
                                 src="/hero4.webp" 
                                 alt="Bunny mascot" 
+                                priority
+                                sizes="60px"
                             />
                         </div>
 
@@ -85,6 +87,8 @@ function Hero() {
                                 src="/hero3.webp" 
                                 alt="Happy children" 
                                 className="relative z-10 rounded-full shadow-2xl border-4 border-white/30" 
+                                priority
+                                sizes="(max-width: 640px) 350px, 0px"
                             />
                         </div>
                     </div>
@@ -99,6 +103,8 @@ function Hero() {
                                 height={280} 
                                 src="/hero2.webp" 
                                 alt="Children learning" 
+                                priority
+                                sizes="(min-width: 640px) 280px, 0px"
                             />
                         </div>
                         <div className="relative group">
@@ -109,6 +115,8 @@ function Hero() {
                                 height={200} 
                                 src="/hero3.webp" 
                                 alt="Happy kids" 
+                                loading="lazy"
+                                sizes="(min-width: 640px) 200px, 0px"
                             />
                         </div>
                         <div className="relative group">
@@ -119,6 +127,8 @@ function Hero() {
                                 height={150} 
                                 src="/hero4.webp" 
                                 alt="Bunny mascot" 
+                                loading="lazy"
+                                sizes="(min-width: 640px) 150px, 0px"
                             />
                         </div>
                         <div className="relative group">
@@ -129,6 +139,8 @@ function Hero() {
                                 height={280} 
                                 src="/hero1.webp" 
                                 alt="Playful activities" 
+                                loading="lazy"
+                                sizes="(min-width: 640px) 280px, 0px"
                             />
                         </div>
                     </div>
