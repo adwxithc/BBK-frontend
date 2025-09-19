@@ -92,9 +92,13 @@ const Navbar = () => {
                     </div>
                 </div>
 
-                {/* Mobile Navigation Menu - Enhanced for mobile */}
-                <div className={nav ? 'fixed top-0 left-0 w-full h-full bg-white/95 backdrop-blur-md z-40 md:hidden transition-all duration-300' : 'fixed top-0 left-[-100%] w-full h-full bg-white/95 backdrop-blur-md z-40 md:hidden transition-all duration-500'}>
-                    <div className='flex flex-col justify-center items-center h-full space-y-6 px-4'>
+                {/* Mobile Navigation Menu - Fixed full background */}
+                <div className={nav ? 'fixed inset-0 w-screen h-screen bg-white z-40 md:hidden transition-all duration-300' : 'fixed top-0 left-[-100%] w-screen h-screen bg-white z-40 md:hidden transition-all duration-500'}>
+                    {/* Solid background overlay */}
+                    <div className="absolute inset-0 bg-white"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-green-50/20 to-yellow-50/30"></div>
+                    
+                    <div className='flex flex-col justify-center items-center h-full space-y-6 px-4 relative z-10'>
                         {/* Mobile logo */}
                         <div className='flex items-center gap-3 mb-6'>
                             <div className='bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] p-3 rounded-xl shadow-lg'>
