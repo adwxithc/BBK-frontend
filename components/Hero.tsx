@@ -8,9 +8,9 @@ function Hero() {
             <div className="absolute inset-0 z-0">
                 {/* Floating shapes */}
                 <div className="absolute top-20 left-10 w-16 h-16 bg-secondary-200/30 rounded-full animate-bounce animation-delay-1000"></div>
-                <div className="absolute top-40 right-20 w-12 h-12 bg-theme-soft-pink/50 rounded-full animate-bounce animation-delay-2000"></div>
-                <div className="absolute bottom-40 left-20 w-20 h-20 bg-theme-soft-blue/50 rounded-full animate-bounce animation-delay-3000"></div>
-                <div className="absolute top-1/3 right-1/4 w-8 h-8 bg-theme-soft-purple/50 rounded-full animate-pulse"></div>
+                <div className="absolute top-40 right-20 w-12 h-12 bg-soft-pink/50 rounded-full animate-bounce animation-delay-2000"></div>
+                <div className="absolute bottom-40 left-20 w-20 h-20 bg-soft-blue/50 rounded-full animate-bounce animation-delay-3000"></div>
+                <div className="absolute top-1/3 right-1/4 w-8 h-8 bg-soft-purple/50 rounded-full animate-pulse"></div>
 
                 {/* Background pattern */}
                 <div className="absolute inset-0 opacity-5">
@@ -41,7 +41,7 @@ function Hero() {
 
                         <h1 className="text-4xl sm:text-6xl lg:text-7xl mb-6 max-w-2xl font-bold leading-tight">
                             <span className="block text-white drop-shadow-md">Welcome to</span>
-                            <span className="block bg-gradient-to-r from-secondary-200 to-theme-warm-300 bg-clip-text text-transparent drop-shadow-lg">
+                            <span className="block bg-gradient-to-r from-secondary-200 to-warm-300 bg-clip-text text-transparent drop-shadow-lg">
                                 Bunny Babies
                             </span>
                         </h1>
@@ -96,7 +96,7 @@ function Hero() {
                     {/* Desktop image grid */}
                     <div className="flex-1 grid-cols-2 gap-6 p-5 hidden sm:grid relative">
                         <div className="relative group">
-                            <div className="absolute -inset-2 bg-gradient-to-r from-secondary-300/50 to-theme-warm-300/50 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute -inset-2 bg-gradient-to-r from-secondary-300/50 to-warm-300/50 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <Image
                                 className="relative z-10 ml-auto rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                                 width={280}
@@ -108,7 +108,7 @@ function Hero() {
                             />
                         </div>
                         <div className="relative group">
-                            <div className="absolute -inset-2 bg-gradient-to-r from-theme-soft-pink/70 to-theme-soft-purple/70 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute -inset-2 bg-gradient-to-r from-soft-pink/70 to-soft-purple/70 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <Image
                                 className="relative z-10 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                                 width={200}
@@ -120,7 +120,7 @@ function Hero() {
                             />
                         </div>
                         <div className="relative group">
-                            <div className="absolute -inset-2 bg-gradient-to-r from-theme-soft-blue/70 to-primary-300/50 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute -inset-2 bg-gradient-to-r from-soft-blue/70 to-primary-300/50 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <Image
                                 className="relative z-10 ml-auto rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                                 width={150}
@@ -180,7 +180,7 @@ function Hero() {
             </div>
 
 
-            <div className="h-16 w-full relative">
+            <div className="h-16 w-full bg-gradient-to-r from-warm-50 to-secondary-100 relative">
                 {/* Floating elements in the transition area */}
                 <div className="absolute top-2 left-1/4 text-2xl animate-bounce animation-delay-1000">🎨</div>
                 <div className="absolute top-4 right-1/3 text-xl animate-bounce animation-delay-2000">📚</div>

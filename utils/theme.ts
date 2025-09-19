@@ -13,32 +13,32 @@ export const theme = {
     light: '#fef9c3', // secondary-100
     main: '#f1f864',  // secondary-400
     dark: '#ca8a04',  // secondary-600
-    gradient: 'from-secondary-200 to-theme-warm-300'
+    gradient: 'from-secondary-200 to-warm-300'
   },
   
   // Warm comfort colors
   warm: {
-    light: '#fef7ed', // theme-warm-50
-    main: '#f19332',  // theme-warm-400
-    dark: '#b84708',  // theme-warm-700
+    light: '#fef7ed', // warm-50
+    main: '#f19332',  // warm-400
+    dark: '#b84708',  // warm-700
   },
   
   // Soft pastel colors for playfulness
   soft: {
-    pink: '#fce7f3',
-    purple: '#f3e8ff',
-    blue: '#dbeafe',
-    mint: '#d1fae5',
-    peach: '#fed7aa',
+    pink: '#fce7f3',    // soft-pink
+    purple: '#f3e8ff',  // soft-purple
+    blue: '#dbeafe',    // soft-blue
+    mint: '#d1fae5',    // soft-mint
+    peach: '#fed7aa',   // soft-peach
   },
   
   // Neutral colors
   neutral: {
-    background: '#fafcfe', // theme-neutral-50
-    surface: '#f1f5f9',    // theme-neutral-100
-    border: '#e2e8f0',     // theme-neutral-200
-    text: '#334155',       // theme-neutral-700
-    muted: '#64748b',      // theme-neutral-500
+    background: '#fafcfe', // background
+    surface: '#f1f5f9',    
+    border: '#e2e8f0',     
+    text: '#334155',       
+    muted: '#64748b',      
   },
   
   // Status colors
@@ -62,24 +62,24 @@ export const colorCombinations = {
   // Background gradients
   backgrounds: {
     hero: 'bg-gradient-to-br from-primary-500 via-primary-400 to-secondary-400',
-    about: 'bg-gradient-to-br from-secondary-400 via-secondary-100 to-theme-warm-100',
-    section: 'bg-gradient-to-r from-theme-neutral-50 to-secondary-50',
+    about: 'bg-gradient-to-br from-secondary-400 via-secondary-100 to-warm-100',
+    section: 'bg-gradient-to-r from-background to-secondary-50',
     card: 'bg-white/60 backdrop-blur-sm border border-white/40',
   },
   
-  // Floating elements
+  // Floating elements - using corrected color names
   floating: {
     shapes: [
       'bg-secondary-200/30',
-      'bg-theme-soft-pink/50',
-      'bg-theme-soft-blue/50',
-      'bg-theme-soft-purple/50',
-      'bg-theme-soft-mint/50',
+      'bg-soft-pink/50',
+      'bg-soft-blue/50', 
+      'bg-soft-purple/50',
+      'bg-soft-mint/50',
     ],
     hovers: [
-      'from-secondary-300/50 to-theme-warm-300/50',
-      'from-theme-soft-pink/70 to-theme-soft-purple/70',
-      'from-theme-soft-blue/70 to-primary-300/50',
+      'from-secondary-300/50 to-warm-300/50',
+      'from-soft-pink/70 to-soft-purple/70',
+      'from-soft-blue/70 to-primary-300/50',
       'from-primary-300/50 to-secondary-300/50',
     ]
   }

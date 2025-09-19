@@ -35,43 +35,25 @@ const config: Config = {
           800: '#854d0e',
           900: '#713f12',
         },
-        // Kindergarten theme colors
-        theme: {
-          // Warm colors for comfort
-          warm: {
-            50: '#fef7ed',
-            100: '#fdedd3',
-            200: '#fad7a5',
-            300: '#f6ba6d',
-            400: '#f19332',
-            500: '#ed7611',
-            600: '#de5f07',
-            700: '#b84708',
-            800: '#92380e',
-            900: '#78300f',
-          },
-          // Soft pastels for playfulness
-          soft: {
-            pink: '#fce7f3',
-            purple: '#f3e8ff',
-            blue: '#dbeafe',
-            mint: '#d1fae5',
-            peach: '#fed7aa',
-          },
-          // Neutral colors
-          neutral: {
-            50: '#fafcfe', // Background
-            100: '#f1f5f9',
-            200: '#e2e8f0',
-            300: '#cbd5e1',
-            400: '#94a3b8',
-            500: '#64748b',
-            600: '#475569',
-            700: '#334155',
-            800: '#1e293b',
-            900: '#0f172a',
-          }
+        // Kindergarten theme colors - flattened for Tailwind compatibility
+        warm: {
+          50: '#fef7ed',
+          100: '#fdedd3',
+          200: '#fad7a5',
+          300: '#f6ba6d',
+          400: '#f19332',
+          500: '#ed7611',
+          600: '#de5f07',
+          700: '#b84708',
+          800: '#92380e',
+          900: '#78300f',
         },
+        // Soft pastel colors
+        'soft-pink': '#fce7f3',
+        'soft-purple': '#f3e8ff',
+        'soft-blue': '#dbeafe',
+        'soft-mint': '#d1fae5',
+        'soft-peach': '#fed7aa',
         // Keep existing for compatibility
         background:'#fafcfe'
       },
