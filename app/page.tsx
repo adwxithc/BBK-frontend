@@ -18,7 +18,6 @@ export default function Home() {
       <OurPrograms />
       <Gallery />
       <OurDays />
-      {/* <Features /> */}
     </main>
   );
 }
