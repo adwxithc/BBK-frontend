@@ -38,31 +38,35 @@ export default function LoginForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-4">
-                <label htmlFor="email">Email</label>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium text-gray-700 block">
+                    Email Address
+                </label>
                 <Input
-                    className="mt-2"
                     id="email"
-                    placeholder="sample@example.com"
+                    placeholder="Enter your email"
                     {...register('email')}
                     error={errors.email?.message}
                 />
             </div>
-            <div className="mb-4">
-                <label htmlFor="password">Password</label>
+            
+            <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium text-gray-700 block">
+                    Password
+                </label>
                 <Input
-                    className="mt-2"
                     id="password"
                     type="password"
-                    placeholder="enter your password.."
+                    placeholder="Enter your password"
                     {...register('password')}
                     error={errors.password?.message}
                 />
             </div>
-            <div className="flex mb-3 justify-center">
-                <Button loading={isLoading} type="submit">
-                    Login
+            
+            <div className="pt-2">
+                <Button loading={isLoading} type="submit" className="w-full">
+                    {isLoading ? 'Signing In...' : 'Sign In'}
                 </Button>
             </div>
         </form>
