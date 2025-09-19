@@ -15,7 +15,7 @@ interface MediaItem {
   category: string;
 }
 
-// Sample media data - replace with your actual content (moved outside component for performance)
+// Sample media data
 const mediaItems: MediaItem[] = [
   {
     id: 1,
