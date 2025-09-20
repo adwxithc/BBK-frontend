@@ -30,9 +30,9 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex-shrink-0">
         <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
@@ -83,9 +83,9 @@ const AdminDashboard = () => {
       </div>
 
       {/* Recent Activities */}
-      <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100">
+      <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100 flex-1 min-h-0">
         <h3 className="text-xl font-bold text-gray-800 mb-6">Recent Activities</h3>
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto max-h-full">
           {recentActivities.map((activity) => (
             <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>

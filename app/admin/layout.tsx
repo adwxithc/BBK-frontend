@@ -40,7 +40,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <button 
@@ -138,7 +138,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       </nav>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="px-4 lg:px-6 py-4">
@@ -181,8 +181,10 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-auto p-4 lg:p-6">
-          {children}
+        <main className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto p-4 lg:p-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>
