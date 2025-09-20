@@ -1,55 +1,57 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Users, Calendar, ImageIcon, Settings, BarChart3, Bell, Search, Plus, Edit, Trash2, Eye, Menu, X } from 'lucide-react';
-
-type TabType = 'overview' | 'students' | 'events' | 'gallery' | 'settings';
-
-interface SidebarItem {
-    id: TabType;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-}
-
-interface Student {
-    id: number;
-    name: string;
-    age: number;
-    parent: string;
-    phone: string;
-    status: 'Active' | 'Inactive';
-}
-
-interface Event {
-    id: number;
-    title: string;
-    date: string;
-    location: string;
-    participants: string;
-}
-
-interface Activity {
-    id: number;
-    action: string;
-    student?: string;
-    teacher?: string;
-    event?: string;
-    count?: string;
-    time: string;
-}
+import { Users, Calendar, ImageIcon, Settings, BarChart3, Bell, Search, Plus, Edit, Trash2, Eye, Download } from 'lucide-react';
+import { Student, Event, StatCard as StatCardType, Activity, SidebarItem, TabType } from '@/types/admin';
+import Sidebar from '@/components/admin/Sidebar';
+import Header from '@/components/admin/Header';
+import StatsCard from '@/components/admin/StatsCard';
+import DataTable from '@/components/admin/DataTable';
+import Card from '@/components/ui/Card';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [sidebarHovered, setSidebarHovered] = useState(false);
 
-    // Sample data - exactly as original
+    // Sample data
     const stats = {
         totalStudents: 85,
         totalTeachers: 12,
         upcomingEvents: 5,
         galleryPhotos: 156
     };
+
+    const statsCards: StatCardType[] = [
+        {
+            title: "Total Students",
+            value: stats.totalStudents,
+            icon: Users,
+            color: "#7CBD1E",
+            bgColor: "#7CBD1E10"
+        },
+        {
+            title: "Teachers",
+            value: stats.totalTeachers,
+            icon: Users,
+            color: "#F1F864",
+            bgColor: "#F1F86410"
+        },
+        {
+            title: "Upcoming Events",
+            value: stats.upcomingEvents,
+            icon: Calendar,
+            color: "#3B82F6",
+            bgColor: "#3B82F610"
+        },
+        {
+            title: "Gallery Photos",
+            value: stats.galleryPhotos,
+            icon: ImageIcon,
+            color: "#8B5CF6",
+            bgColor: "#8B5CF610"
+        }
+    ];
 
     const recentActivities: Activity[] = [
         { id: 1, action: "New student enrollment", student: "Emma Johnson", time: "2 hours ago" },
@@ -81,7 +83,107 @@ const AdminDashboard = () => {
 
     const renderOverview = () => (
         <div className="space-y-6">
-            {/* Stats Cards - Original Design */}
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {statsCards.map((stat, index) => (
+                    <StatsCard key={index} stat={stat} />
+                ))}
+            </div>
+
+            {/* Recent Activities */}
+            <Card>
+                <h3 className="text-xl font-bold text-gray-800 mb-6">Recent Activities</h3>
+                <div className="space-y-4">
+                    {recentActivities.map((activity) => (
+                        <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <p className="font-medium text-gray-800">{activity.action}</p>
+                                <p className="text-sm text-gray-600">
+                                    {activity.student && `Student: ${activity.student}`}
+                                    {activity.teacher && `Teacher: ${activity.teacher}`}
+                                    {activity.event && `Event: ${activity.event}`}
+                                    {activity.count && activity.count}
+                                </p>
+                            </div>
+                            <span className="text-sm text-gray-500">{activity.time}</span>
+                        </div>
+                    ))}
+                </div>
+            </Card>
+        </div>
+    );
+
+    const renderStudents = () => {
+        const columns = [
+            { key: 'name', label: 'Name' },
+            { key: 'age', label: 'Age' },
+            { key: 'parent', label: 'Parent' },
+            { key: 'phone', label: 'Phone' },
+            { 
+                key: 'status', 
+                label: 'Status',
+                render: (value: string) => (
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        value === 'Active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                    }`}>
+                        {value}
+                    </span>
+                )
+            }
+        ];
+
+        return (
+            <DataTable
+                data={students}
+                columns={columns}
+                title="Students Management"
+                onAdd={() => console.log('Add student')}
+                onEdit={(student) => console.log('Edit student:', student)}
+                onDelete={(student) => console.log('Delete student:', student)}
+                onView={(student) => console.log('View student:', student)}
+            />
+        );
+    };
+
+    const renderEvents = () => {
+        const columns = [
+            { key: 'title', label: 'Event Title' },
+            { key: 'date', label: 'Date' },
+            { key: 'location', label: 'Location' },
+            { key: 'participants', label: 'Participants' }
+        ];
+
+        return (
+            <DataTable
+                data={upcomingEvents}
+                columns={columns}
+                title="Events Management"
+                onAdd={() => console.log('Add event')}
+                onEdit={(event) => console.log('Edit event:', event)}
+                onDelete={(event) => console.log('Delete event:', event)}
+            />
+        );
+    };
+
+    const renderGallery = () => (
+        <Card className="text-center">
+            <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Gallery</h3>
+            <p className="text-gray-600">Gallery management will be implemented here.</p>
+        </Card>
+    );
+
+    const renderSettings = () => (
+        <Card className="text-center">
+            <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Settings</h3>
+            <p className="text-gray-600">Settings panel will be implemented here.</p>
+        </Card>
+    );
+        <div className="space-y-6">
+            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
                     <div className="flex items-center justify-between">
@@ -111,10 +213,10 @@ const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-gray-600 text-sm font-medium">Upcoming Events</p>
-                            <p className="text-3xl font-bold text-[#3B82F6] mt-1">{stats.upcomingEvents}</p>
+                            <p className="text-3xl font-bold text-blue-500 mt-1">{stats.upcomingEvents}</p>
                         </div>
-                        <div className="w-12 h-12 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center">
-                            <Calendar className="w-6 h-6 text-[#3B82F6]" />
+                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <Calendar className="w-6 h-6 text-blue-500" />
                         </div>
                     </div>
                 </div>
@@ -123,29 +225,29 @@ const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-gray-600 text-sm font-medium">Gallery Photos</p>
-                            <p className="text-3xl font-bold text-[#8B5CF6] mt-1">{stats.galleryPhotos}</p>
+                            <p className="text-3xl font-bold text-purple-500 mt-1">{stats.galleryPhotos}</p>
                         </div>
-                        <div className="w-12 h-12 bg-[#8B5CF6]/10 rounded-xl flex items-center justify-center">
-                            <ImageIcon className="w-6 h-6 text-[#8B5CF6]" />
+                        <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6 text-purple-500" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Recent Activities - Original Design */}
-            <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100">
-                <h3 className="text-xl font-bold text-gray-800 mb-6">Recent Activities</h3>
+            {/* Recent Activities */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Activities</h3>
                 <div className="space-y-4">
                     {recentActivities.map((activity) => (
-                        <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <p className="font-medium text-gray-800">{activity.action}</p>
-                                <p className="text-sm text-gray-600">
-                                    {activity.student && `Student: ${activity.student}`}
-                                    {activity.teacher && `Teacher: ${activity.teacher}`}
-                                    {activity.event && `Event: ${activity.event}`}
-                                    {activity.count && `${activity.count}`}
-                                </p>
+                        <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 bg-[#7CBD1E] rounded-full"></div>
+                                <div>
+                                    <p className="font-medium text-gray-800">{activity.action}</p>
+                                    <p className="text-sm text-gray-600">
+                                        {activity.student || activity.teacher || activity.event || `${activity.count}`}
+                                    </p>
+                                </div>
                             </div>
                             <span className="text-sm text-gray-500">{activity.time}</span>
                         </div>
@@ -157,23 +259,33 @@ const AdminDashboard = () => {
 
     const renderStudents = () => (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Students Management</h2>
-                <button className="bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] text-white px-4 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
-                    <Plus className="w-5 h-5 inline mr-2" />
-                    Add Student
-                </button>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-2xl font-bold text-gray-800">Student Management</h2>
+                <div className="flex gap-3">
+                    <div className="relative">
+                        <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input 
+                            type="text" 
+                            placeholder="Search students..." 
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#7CBD1E] focus:border-transparent"
+                        />
+                    </div>
+                    <button className="bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 hover:shadow-lg transition-all duration-300">
+                        <Plus className="w-5 h-5" />
+                        Add Student
+                    </button>
+                </div>
             </div>
-            
+
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Name</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Student Name</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Age</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Parent</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Phone</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Parent/Guardian</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Contact</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Status</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
                             </tr>
@@ -181,12 +293,19 @@ const AdminDashboard = () => {
                         <tbody className="divide-y divide-gray-100">
                             {students.map((student) => (
                                 <tr key={student.id} className="hover:bg-gray-50 transition-colors duration-200">
-                                    <td className="px-6 py-4 font-medium text-gray-900">{student.name}</td>
-                                    <td className="px-6 py-4 text-gray-600">{student.age}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] rounded-full flex items-center justify-center text-white font-bold">
+                                                {student.name.charAt(0)}
+                                            </div>
+                                            <span className="font-medium text-gray-800">{student.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-600">{student.age} years</td>
                                     <td className="px-6 py-4 text-gray-600">{student.parent}</td>
                                     <td className="px-6 py-4 text-gray-600">{student.phone}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                                             student.status === 'Active' 
                                                 ? 'bg-green-100 text-green-800' 
                                                 : 'bg-red-100 text-red-800'
@@ -195,14 +314,14 @@ const AdminDashboard = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex space-x-2">
-                                            <button className="p-1 text-blue-600 hover:text-blue-800">
+                                        <div className="flex gap-2">
+                                            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200">
                                                 <Eye className="w-4 h-4" />
                                             </button>
-                                            <button className="p-1 text-green-600 hover:text-green-800">
+                                            <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200">
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            <button className="p-1 text-red-600 hover:text-red-800">
+                                            <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -218,48 +337,49 @@ const AdminDashboard = () => {
 
     const renderEvents = () => (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Events Management</h2>
-                <button className="bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] text-white px-4 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
-                    <Plus className="w-5 h-5 inline mr-2" />
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-2xl font-bold text-gray-800">Event Management</h2>
+                <button className="bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 hover:shadow-lg transition-all duration-300">
+                    <Plus className="w-5 h-5" />
                     Create Event
                 </button>
             </div>
-            
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Event Title</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Location</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Participants</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {upcomingEvents.map((event) => (
-                                <tr key={event.id} className="hover:bg-gray-50 transition-colors duration-200">
-                                    <td className="px-6 py-4 font-medium text-gray-900">{event.title}</td>
-                                    <td className="px-6 py-4 text-gray-600">{event.date}</td>
-                                    <td className="px-6 py-4 text-gray-600">{event.location}</td>
-                                    <td className="px-6 py-4 text-gray-600">{event.participants}</td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex space-x-2">
-                                            <button className="p-1 text-green-600 hover:text-green-800">
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-1 text-red-600 hover:text-red-800">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+
+            <div className="grid gap-6">
+                {upcomingEvents.map((event) => (
+                    <div key={event.id} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div className="flex-1">
+                                <h3 className="text-xl font-bold text-gray-800 mb-2">{event.title}</h3>
+                                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>{event.date}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span>📍</span>
+                                        <span>{event.location}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Users className="w-4 h-4" />
+                                        <span>{event.participants}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                                    <Eye className="w-5 h-5" />
+                                </button>
+                                <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200">
+                                    <Edit className="w-5 h-5" />
+                                </button>
+                                <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200">
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -272,6 +392,10 @@ const AdminDashboard = () => {
                     <button className="bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 hover:shadow-lg transition-all duration-300">
                         <Plus className="w-5 h-5" />
                         Upload Photos
+                    </button>
+                    <button className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl font-medium flex items-center gap-2 hover:bg-gray-50 transition-all duration-300">
+                        <Download className="w-5 h-5" />
+                        Export
                     </button>
                 </div>
             </div>
@@ -330,8 +454,8 @@ const AdminDashboard = () => {
 
     const renderSettings = () => (
         <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100 text-center">
-            <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Settings</h3>
+            <Settings className="w-12 h-12 lg:w-16 lg:h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-2">Settings</h3>
             <p className="text-gray-600">Settings panel will be implemented here.</p>
         </div>
     );
@@ -352,7 +476,7 @@ const AdminDashboard = () => {
                 />
             )}
 
-            {/* Sidebar - ORIGINAL DESIGN */}
+            {/* Sidebar */}
             <nav 
                 className={`${
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -417,9 +541,7 @@ const AdminDashboard = () => {
                             </button>
                         );
                     })}
-                </nav>
-
-                {/* User Profile */}
+                </nav>                {/* User Profile */}
                 <div className={`p-4 border-t ${!sidebarHovered ? 'lg:p-2' : ''}`}>
                     <div className={`flex items-center ${!sidebarHovered ? 'lg:justify-center' : 'space-x-3'}`}>
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] flex items-center justify-center flex-shrink-0">
@@ -437,7 +559,7 @@ const AdminDashboard = () => {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Header - ORIGINAL DESIGN */}
+                {/* Header */}
                 <header className="bg-white shadow-sm border-b">
                     <div className="px-4 lg:px-6 py-4">
                         <div className="flex justify-between items-center">
@@ -487,7 +609,13 @@ const AdminDashboard = () => {
                     {activeTab === 'students' && renderStudents()}
                     {activeTab === 'events' && renderEvents()}
                     {activeTab === 'gallery' && renderGallery()}
-                    {activeTab === 'settings' && renderSettings()}
+                    {activeTab === 'settings' && (
+                        <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-lg border border-gray-100 text-center">
+                            <Settings className="w-12 h-12 lg:w-16 lg:h-16 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-2">Settings</h3>
+                            <p className="text-gray-600">Settings panel will be implemented here.</p>
+                        </div>
+                    )}
                 </main>
             </div>
         </div>

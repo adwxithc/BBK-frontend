@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { Input } from '@/components/Input';
+import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -39,33 +39,29 @@ export default function LoginForm() {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700 block">
-                    Email Address
-                </label>
-                <Input
-                    id="email"
-                    placeholder="Enter your email"
-                    {...register('email')}
-                    error={errors.email?.message}
-                />
-            </div>
+            <Input
+                label="Email Address"
+                placeholder="Enter your email"
+                {...register('email')}
+                error={errors.email?.message}
+            />
             
-            <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-gray-700 block">
-                    Password
-                </label>
-                <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    {...register('password')}
-                    error={errors.password?.message}
-                />
-            </div>
+            <Input
+                label="Password"
+                type="password"
+                placeholder="Enter your password"
+                {...register('password')}
+                error={errors.password?.message}
+            />
             
             <div className="pt-2">
-                <Button loading={isLoading} type="submit" className="w-full">
+                <Button 
+                    loading={isLoading} 
+                    type="submit" 
+                    className="w-full"
+                    variant="primary"
+                    size="lg"
+                >
                     {isLoading ? 'Signing In...' : 'Sign In'}
                 </Button>
             </div>
