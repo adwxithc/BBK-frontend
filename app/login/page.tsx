@@ -1,6 +1,7 @@
-import LoginForm from "./LoginForm"
+import LoginForm from "./LoginForm";
+import Card from "@/components/ui/Card";
 
-function page() {
+function LoginPage() {
     return (
         <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-green-50 to-yellow-50">
             {/* Animated background elements */}
@@ -17,8 +18,12 @@ function page() {
             <div className="relative z-10 flex justify-center items-center min-h-screen p-4">
                 {/* Main login container */}
                 <div className="w-full max-w-md">
-                    {/* Glassmorphism card */}
-                    <div className="backdrop-blur-xl bg-white/80 border border-white/20 rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+                    {/* Enhanced Card with glassmorphism */}
+                    <Card 
+                        padding="lg" 
+                        shadow="xl"
+                        className="backdrop-blur-xl bg-white/80 border border-white/20 rounded-3xl relative overflow-hidden"
+                    >
                         {/* Card glow effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-[#7CBD1E]/10 via-transparent to-[#F1F864]/10 rounded-3xl"></div>
                         
@@ -46,15 +51,15 @@ function page() {
                                 Bunny Babies - Secure Admin Portal
                             </p>
                         </div>
-                    </div>
 
-                    {/* Additional decorative elements */}
-                    <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-r from-[#7CBD1E]/20 to-[#F1F864]/20 rounded-full blur-2xl"></div>
-                    <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-r from-[#F1F864]/20 to-[#7CBD1E]/20 rounded-full blur-2xl"></div>
+                        {/* Additional decorative elements */}
+                        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-r from-[#7CBD1E]/20 to-[#F1F864]/20 rounded-full blur-2xl"></div>
+                        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-r from-[#F1F864]/20 to-[#7CBD1E]/20 rounded-full blur-2xl"></div>
+                    </Card>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-export default page
+export default LoginPage;
