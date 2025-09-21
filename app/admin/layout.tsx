@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
-import { Menu, X, Bell, Search, Users, Calendar, ImageIcon, Settings, BarChart3, LogOut } from 'lucide-react';
+import { Menu, X, Bell, Search, Users, Settings, BarChart3, LogOut, FolderOpen, CalendarDays } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import { logout } from '@/redux/features/authSlice';
@@ -46,8 +46,8 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const sidebarItems: SidebarItem[] = [
     { id: 'overview', label: 'Dashboard', icon: BarChart3, href: '/admin' },
     { id: 'students', label: 'Students', icon: Users, href: '/admin/students' },
-    { id: 'events', label: 'Events', icon: Calendar, href: '/admin/events' },
-    { id: 'gallery', label: 'Gallery', icon: ImageIcon, href: '/admin/gallery' },
+    { id: 'event-categories', label: 'Event Categories', icon: FolderOpen, href: '/admin/event-categories' },
+    { id: 'events', label: 'Events', icon: CalendarDays, href: '/admin/events' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/admin/settings' }
   ];
 

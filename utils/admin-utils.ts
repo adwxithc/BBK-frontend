@@ -27,6 +27,10 @@ export const getPageTitle = (path: string): string => {
   if (path === '/admin') return 'Dashboard Overview';
   const segment = path.split('/admin/')[1];
   if (!segment) return 'Dashboard Overview';
+  
+  // Handle special cases
+  if (segment === 'event-categories') return 'Event Categories';
+  
   return segment.charAt(0).toUpperCase() + segment.slice(1);
 };
 
@@ -48,5 +52,14 @@ export const getPageDescription = (path: string, userName?: string): string => {
       ? `Welcome back, ${userName}! Here's your admin dashboard`
       : 'Welcome to your admin dashboard';
   }
+  
+  // Handle special cases
+  if (segment === 'event-categories') {
+    return 'Manage event categories like Sports Day, Annual Day, and more';
+  }
+  if (segment === 'events') {
+    return 'Create and manage specific events with photos and details';
+  }
+  
   return `Manage your ${segment} efficiently`;
 };
