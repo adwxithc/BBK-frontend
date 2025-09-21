@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { Edit, Trash2, Eye, MoreVertical } from 'lucide-react';
 import { IEventCategory } from '@/types/events';
 
@@ -18,26 +17,17 @@ const EventCategoryCard: React.FC<EventCategoryCardProps> = ({
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      {/* Cover Image */}
+      {/* Category Icon Display */}
       <div 
-        className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden"
+        className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden flex items-center justify-center"
         style={{ backgroundColor: category.color + '20' }}
       >
-        {category.coverImage ? (
-          <Image
-            src={category.coverImage}
-            alt={category.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div 
-            className="w-full h-full flex items-center justify-center text-6xl"
-            style={{ backgroundColor: category.color + '10' }}
-          >
-            {category.icon}
-          </div>
-        )}
+        <div 
+          className="w-full h-full flex items-center justify-center text-6xl"
+          style={{ backgroundColor: category.color + '10' }}
+        >
+          {category.icon}
+        </div>
         
         {/* Status Badge */}
         <div className="absolute top-3 right-3">
