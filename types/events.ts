@@ -2,6 +2,9 @@
  * Event management type definitions
  */
 
+// Import IResponse from data types
+import { IResponse, Ierror } from './data';
+
 export interface IEventCategory {
   _id?: string;
   name: string;                    // "Annual Day", "Sports Day", "Teachers Day"
@@ -74,23 +77,34 @@ export interface IEventGalleryImage {
   uploadedAt: Date;
 }
 
-// API Response types
-export interface IEventCategoryResponse {
-  success: boolean;
-  data: IEventCategory | IEventCategory[];
-  message?: string;
+// Pagination interface
+export interface IPagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
 }
 
-export interface IEventResponse {
-  success: boolean;
-  data: IEvent | IEvent[];
-  message?: string;
+// Categories list response with pagination
+export interface IEventCategoriesData {
+  categories: IEventCategory[];
+  pagination: IPagination;
 }
+
+// API Response types (using standard IResponse<T> format)
+export type IEventCategoryResponse = IResponse<IEventCategory>;
+export type IEventCategoriesResponse = IResponse<IEventCategoriesData>;
+export type IEventResponse = IResponse<IEvent>;
+export type IEventsResponse = IResponse<IEvent[]>;
+
+// Error Response types  
+export type IApiErrorResponse = Ierror;
 
 // Form types
 export interface IEventCategoryForm {
   name: string;
   description: string;
+  slug?: string;                   // Optional - will be auto-generated if not provided
   color: string;
   coverImage?: File | string;
   isActive: boolean;
@@ -140,6 +154,8 @@ export interface IEventFilters {
 export interface IEventCategoryFilters {
   isActive?: boolean;
   search?: string;
+  page?: number;
+  limit?: number;
 }
 
 // Media-related constants and utilities

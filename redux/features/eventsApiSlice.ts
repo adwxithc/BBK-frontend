@@ -1,7 +1,9 @@
 import { apiSlice } from '../apiSlice';
 import { 
-  IEventCategoryResponse, 
+  IEventCategoryResponse,
+  IEventCategoriesResponse, 
   IEventResponse,
+  IEventsResponse,
   IEventCategoryForm,
   IEventForm,
   IEventFilters,
@@ -11,14 +13,16 @@ import {
 export const eventsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Event Categories
-    getEventCategories: builder.query<IEventCategoryResponse, IEventCategoryFilters | void>({
+    getEventCategories: builder.query<IEventCategoriesResponse, IEventCategoryFilters | void>({
       query: (filters) => {
         const params = new URLSearchParams();
         if (filters?.isActive !== undefined) params.append('isActive', filters.isActive.toString());
         if (filters?.search) params.append('search', filters.search);
+        if (filters?.page) params.append('page', filters.page.toString());
+        if (filters?.limit) params.append('limit', filters.limit.toString());
         
         return {
-          url: `/admin/event-categories?${params.toString()}`,
+          url: `/admin/event-category?${params.toString()}`,
         };
       },
       providesTags: ['EventCategory'],
@@ -33,23 +37,16 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
 
     createEventCategory: builder.mutation<IEventCategoryResponse, IEventCategoryForm>({
       query: (eventCategory) => {
-        const formData = new FormData();
-        
-        // Add form fields
-        formData.append('name', eventCategory.name);
-        formData.append('description', eventCategory.description);
-        formData.append('color', eventCategory.color);
-        formData.append('isActive', eventCategory.isActive.toString());
-        
-        // Handle file upload
-        if (eventCategory.coverImage instanceof File) {
-          formData.append('coverImage', eventCategory.coverImage);
-        }
 
         return {
-          url: '/admin/event-categories',
+          url: '/admin/event-category',
           method: 'POST',
-          body: formData,
+          body: {
+            name: eventCategory.name,
+            description: eventCategory.description,
+            slug: eventCategory.slug,
+            color: eventCategory.color,
+          },
         };
       },
       invalidatesTags: ['EventCategory'],
@@ -86,7 +83,7 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
     }),
 
     // Events
-    getEvents: builder.query<IEventResponse, IEventFilters | void>({
+    getEvents: builder.query<IEventsResponse, IEventFilters | void>({
       query: (filters) => {
         const params = new URLSearchParams();
         

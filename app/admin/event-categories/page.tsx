@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye } from 'lucide-react';
+import CreateEventCategoryModal from '@/components/admin/events/CreateEventCategoryModal';
 
 // Mock data for development
 const mockEventCategories = [
@@ -11,8 +12,8 @@ const mockEventCategories = [
     description: 'Yearly celebration showcasing student talents and achievements',
     slug: 'annual-day',
     color: '#FF6B6B',
-    icon: '🎭',
     isActive: true,
+    createdBy: 'admin@example.com',
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15'),
   },
@@ -22,8 +23,8 @@ const mockEventCategories = [
     description: 'Athletic competitions and physical activities for all age groups',
     slug: 'sports-day',
     color: '#4ECDC4',
-    icon: '🏃‍♂️',
     isActive: true,
+    createdBy: 'admin@example.com',
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
   },
@@ -33,8 +34,8 @@ const mockEventCategories = [
     description: 'Honoring our dedicated educators with special celebrations',
     slug: 'teachers-day',
     color: '#45B7D1',
-    icon: '👩‍🏫',
     isActive: true,
+    createdBy: 'admin@example.com',
     createdAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-05'),
   },
@@ -44,8 +45,8 @@ const mockEventCategories = [
     description: 'Showcasing creative works and artistic talents of our students',
     slug: 'art-craft-exhibition',
     color: '#F7DC6F',
-    icon: '🎨',
     isActive: false,
+    createdBy: 'admin@example.com',
     createdAt: new Date('2023-12-20'),
     updatedAt: new Date('2023-12-20'),
   },
@@ -55,8 +56,8 @@ const mockEventCategories = [
     description: 'Festive celebrations with decorations, carols, and gift exchanges',
     slug: 'christmas-celebration',
     color: '#E74C3C',
-    icon: '🎄',
     isActive: true,
+    createdBy: 'admin@example.com',
     createdAt: new Date('2024-02-01'),
     updatedAt: new Date('2024-02-01'),
   },
@@ -66,8 +67,8 @@ const mockEventCategories = [
     description: 'Interactive science experiments and demonstrations by our young scientists',
     slug: 'science-fair',
     color: '#9B59B6',
-    icon: '🔬',
     isActive: true,
+    createdBy: 'admin@example.com',
     createdAt: new Date('2024-01-20'),
     updatedAt: new Date('2024-01-20'),
   },
@@ -270,29 +271,15 @@ const EventCategoriesPage = () => {
         </div>
       )}
 
-      {/* Create Modal Placeholder */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Create Event Category</h2>
-            <p className="text-gray-600 mb-4">Modal form will be implemented here</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-4 py-2 bg-[#7CBD1E] text-white rounded-lg hover:bg-[#6BAE1A]"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Create Event Category Modal */}
+      <CreateEventCategoryModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          // Optionally refresh the data or show a success message
+          console.log('Event category created successfully');
+        }}
+      />
     </div>
   );
 };
