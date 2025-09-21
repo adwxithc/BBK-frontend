@@ -1,9 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
 import Link from 'next/link';
-import { Menu, X, Bell, Search, Users, Calendar, ImageIcon, Settings, BarChart3 } from 'lucide-react';
+import { Menu, X, Bell, Search, Users, Calendar, ImageIcon, Settings, BarChart3, LogOut } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { logout } from '@/redux/features/authSlice';
+import { useLogoutMutation } from '@/redux/features/adminApiSlice';
 
 interface SidebarItem {
   id: string;
@@ -16,6 +20,21 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const [logoutApi] = useLogoutMutation();
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi().unwrap();
+    } catch (error) {
+      console.log('Logout API error:', error);
+    } finally {
+      // Clear Redux state and redirect regardless of API response
+      dispatch(logout());
+      router.push('/login');
+    }
+  };
 
   const sidebarItems: SidebarItem[] = [
     { id: 'overview', label: 'Dashboard', icon: BarChart3, href: '/admin' },
@@ -40,7 +59,8 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex overflow-hidden">
+    <ProtectedRoute>
+      <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <button 
@@ -175,6 +195,13 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                   <Bell className="h-5 w-5 lg:h-6 lg:w-6" />
                   <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
                 </button>
+                <button 
+                  onClick={handleLogout}
+                  className="p-1.5 lg:p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5 lg:h-6 lg:w-6" />
+                </button>
               </div>
             </div>
           </div>
@@ -188,6 +215,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </main>
       </div>
     </div>
+    </ProtectedRoute>
   );
 };
 
