@@ -9,7 +9,6 @@ export interface IEventCategory {
   slug: string;                    // URL-friendly version: "annual-day"
   color: string;                   // Theme color for the category
   icon?: string;                   // Icon name or emoji
-  coverImage?: string;             // Default category image
   isActive: boolean;               // Whether category is active
   createdBy: string;               // Admin ID who created
   createdAt: Date;

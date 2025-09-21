@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye } from 'lucide-react';
 
 // Mock data for development
@@ -13,7 +12,6 @@ const mockEventCategories = [
     slug: 'annual-day',
     color: '#FF6B6B',
     icon: '🎭',
-    coverImage: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=250&fit=crop',
     isActive: true,
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15'),
@@ -25,7 +23,6 @@ const mockEventCategories = [
     slug: 'sports-day',
     color: '#4ECDC4',
     icon: '🏃‍♂️',
-    coverImage: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=250&fit=crop',
     isActive: true,
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
@@ -37,7 +34,6 @@ const mockEventCategories = [
     slug: 'teachers-day',
     color: '#45B7D1',
     icon: '👩‍🏫',
-    coverImage: 'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=400&h=250&fit=crop',
     isActive: true,
     createdAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-05'),
@@ -49,7 +45,6 @@ const mockEventCategories = [
     slug: 'art-craft-exhibition',
     color: '#F7DC6F',
     icon: '🎨',
-    coverImage: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=250&fit=crop',
     isActive: false,
     createdAt: new Date('2023-12-20'),
     updatedAt: new Date('2023-12-20'),
@@ -61,7 +56,6 @@ const mockEventCategories = [
     slug: 'christmas-celebration',
     color: '#E74C3C',
     icon: '🎄',
-    coverImage: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=400&h=250&fit=crop',
     isActive: true,
     createdAt: new Date('2024-02-01'),
     updatedAt: new Date('2024-02-01'),
@@ -73,7 +67,6 @@ const mockEventCategories = [
     slug: 'science-fair',
     color: '#9B59B6',
     icon: '🔬',
-    coverImage: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=250&fit=crop',
     isActive: true,
     createdAt: new Date('2024-01-20'),
     updatedAt: new Date('2024-01-20'),
@@ -156,105 +149,102 @@ const EventCategoriesPage = () => {
         </div>
       </div>
 
-      {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCategories.map((category) => (
-          <div
-            key={category._id}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
-          >
-            {/* Cover Image */}
-            <div 
-              className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden"
-              style={{ backgroundColor: category.color + '20' }}
-            >
-              {category.coverImage ? (
-                <Image
-                  src={category.coverImage}
-                  alt={category.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              ) : (
-                <div 
-                  className="w-full h-full flex items-center justify-center text-6xl"
-                  style={{ backgroundColor: category.color + '10' }}
-                >
-                  {category.icon}
-                </div>
-              )}
-              
-              {/* Status Badge */}
-              <div className="absolute top-3 right-3">
-                <span
-                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    category.isActive
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {category.isActive ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-
-              {/* Actions Menu */}
-              <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="relative">
-                  <button className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50">
-                    <MoreVertical className="h-4 w-4 text-gray-600" />
-                  </button>
-                  {/* Dropdown menu would go here */}
-                </div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#7CBD1E] transition-colors">
-                  {category.name}
-                </h3>
-                <div 
-                  className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: category.color }}
-                ></div>
-              </div>
-              
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {category.description}
-              </p>
-
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                <span>Created: {category.createdAt.toLocaleDateString()}</span>
-                <span>/{category.slug}</span>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleViewCategory(category._id)}
-                  className="flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
-                >
-                  <Eye className="h-4 w-4" />
-                  View
-                </button>
-                <button
-                  onClick={() => handleEditCategory(category._id)}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center gap-1"
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteCategory(category._id)}
-                  className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors flex items-center justify-center"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* Categories Table */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left py-4 px-6 font-semibold text-gray-900">Category</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-900">Description</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-900">Slug</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-900">Status</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-900">Created</th>
+                <th className="text-right py-4 px-6 font-semibold text-gray-900">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredCategories.map((category) => (
+                <tr key={category._id} className="hover:bg-gray-50 transition-colors">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-4">
+                      <div 
+                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm"
+                        style={{ backgroundColor: category.color + '20' }}
+                      >
+                        {category.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-lg">{category.name}</h3>
+                        <div 
+                          className="w-3 h-3 rounded-full mt-1"
+                          style={{ backgroundColor: category.color }}
+                        ></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <p className="text-gray-600 text-sm leading-relaxed max-w-xs">
+                      {category.description}
+                    </p>
+                  </td>
+                  <td className="py-4 px-6">
+                    <code className="bg-gray-100 px-2 py-1 rounded text-sm text-gray-700">
+                      /{category.slug}
+                    </code>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${
+                        category.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {category.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="text-sm text-gray-600">
+                      <div>{category.createdAt.toLocaleDateString()}</div>
+                      <div className="text-xs text-gray-400">
+                        {category.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleViewCategory(category._id)}
+                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="View Category"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleEditCategory(category._id)}
+                        className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Edit Category"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCategory(category._id)}
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Category"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Empty State */}
