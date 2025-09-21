@@ -2,13 +2,15 @@
 
 import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import { Menu, X, Bell, Search, Users, Calendar, ImageIcon, Settings, BarChart3, LogOut } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import { logout } from '@/redux/features/authSlice';
 import { useLogoutMutation } from '@/redux/features/adminApiSlice';
+import { RootState } from '@/redux/store';
+import { truncateEmail, getPageTitle, getPageDescription } from '@/utils/admin-utils';
 
 interface SidebarItem {
   id: string;
@@ -24,6 +26,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
   const [logoutApi] = useLogoutMutation();
 
   const handleLogout = async () => {
@@ -47,20 +50,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { id: 'gallery', label: 'Gallery', icon: ImageIcon, href: '/admin/gallery' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/admin/settings' }
   ];
-
-  const getPageTitle = (path: string) => {
-    if (path === '/admin') return 'Dashboard Overview';
-    const segment = path.split('/admin/')[1];
-    if (!segment) return 'Dashboard Overview';
-    return segment.charAt(0).toUpperCase() + segment.slice(1);
-  };
-
-  const getPageDescription = (path: string) => {
-    if (path === '/admin') return 'Welcome to your admin dashboard';
-    const segment = path.split('/admin/')[1];
-    if (!segment) return 'Welcome to your admin dashboard';
-    return `Manage your ${segment} efficiently`;
-  };
 
   return (
     <ProtectedRoute>
@@ -149,13 +138,22 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         <div className={`p-4 border-t ${!sidebarHovered ? 'lg:p-2' : ''}`}>
           <div className={`flex items-center ${!sidebarHovered ? 'lg:justify-center' : 'space-x-3'}`}>
             <div className="h-10 w-10 rounded-full bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-sm font-medium">A</span>
+              <span className="text-white text-sm font-medium">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+              </span>
             </div>
             <div className={`flex-1 min-w-0 transition-all duration-300 overflow-hidden ${
               !sidebarHovered ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'
             }`}>
-              <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">Admin</p>
-              <p className="text-xs text-gray-500 truncate whitespace-nowrap">admin@bunnybabies.com</p>
+              <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">
+                {user?.name || 'Admin'}
+              </p>
+              <p 
+                className="text-xs text-gray-500 truncate whitespace-nowrap cursor-help"
+                title={user?.email || 'admin@bunnybabies.com'}
+              >
+                {user?.email ? truncateEmail(user.email) : 'admin@bunnybabies.com'}
+              </p>
             </div>
           </div>
         </div>
@@ -181,7 +179,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                     {getPageTitle(pathname)}
                   </h2>
                   <p className="text-sm lg:text-base text-gray-600">
-                    {getPageDescription(pathname)}
+                    {getPageDescription(pathname, user?.name)}
                   </p>
                 </div>
               </div>
