@@ -7,7 +7,7 @@ import { RootState } from '@/redux/store';
 import { useAuthCheck } from '@/hooks/useAuthCheck';
 
 interface ProtectedRouteProps {
-    children: React.ReactNode;
+    readonly children: React.ReactNode;
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {

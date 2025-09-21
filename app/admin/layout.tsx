@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import Link from 'next/link';
 import { Menu, X, Bell, Search, Users, Calendar, ImageIcon, Settings, BarChart3, LogOut } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import { logout } from '@/redux/features/authSlice';
 import { useLogoutMutation } from '@/redux/features/adminApiSlice';
 
@@ -19,12 +20,15 @@ interface SidebarItem {
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
   const [logoutApi] = useLogoutMutation();
 
   const handleLogout = async () => {
+    setShowLogoutModal(false); // Close modal first
+    
     try {
       await logoutApi().unwrap();
     } catch (error) {
@@ -196,7 +200,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                   <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
                 </button>
                 <button 
-                  onClick={handleLogout}
+                  onClick={() => setShowLogoutModal(true)}
                   className="p-1.5 lg:p-2 text-gray-400 hover:text-red-500 transition-colors"
                   title="Logout"
                 >
@@ -215,6 +219,18 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </main>
       </div>
     </div>
+    
+    {/* Logout Confirmation Modal */}
+    <ConfirmationModal
+      isOpen={showLogoutModal}
+      onClose={() => setShowLogoutModal(false)}
+      onConfirm={handleLogout}
+      title="Confirm Logout"
+      message="Are you sure you want to logout? You will need to sign in again to access the admin dashboard."
+      confirmText="Logout"
+      cancelText="Stay Logged In"
+      type="warning"
+    />
     </ProtectedRoute>
   );
 };
