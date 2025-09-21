@@ -41,10 +41,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
         formData.append('color', eventCategory.color);
         formData.append('isActive', eventCategory.isActive.toString());
         
-        if (eventCategory.icon) {
-          formData.append('icon', eventCategory.icon);
-        }
-        
         // Handle file upload
         if (eventCategory.coverImage instanceof File) {
           formData.append('coverImage', eventCategory.coverImage);
@@ -67,10 +63,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
         formData.append('description', data.description);
         formData.append('color', data.color);
         formData.append('isActive', data.isActive.toString());
-        
-        if (data.icon) {
-          formData.append('icon', data.icon);
-        }
         
         if (data.coverImage instanceof File) {
           formData.append('coverImage', data.coverImage);

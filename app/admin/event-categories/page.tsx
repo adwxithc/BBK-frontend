@@ -169,10 +169,10 @@ const EventCategoriesPage = () => {
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-4">
                       <div 
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm"
-                        style={{ backgroundColor: category.color + '20' }}
+                        className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm"
+                        style={{ backgroundColor: category.color }}
                       >
-                        {category.icon}
+                        {category.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <h3 className="font-bold text-gray-900 text-lg">{category.name}</h3>

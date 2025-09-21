@@ -17,16 +17,19 @@ const EventCategoryCard: React.FC<EventCategoryCardProps> = ({
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      {/* Category Icon Display */}
+      {/* Category Color Display */}
       <div 
-        className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden flex items-center justify-center"
-        style={{ backgroundColor: category.color + '20' }}
+        className="h-48 bg-gradient-to-br relative overflow-hidden flex items-center justify-center"
+        style={{ 
+          backgroundColor: category.color + '20',
+          background: `linear-gradient(135deg, ${category.color}20 0%, ${category.color}40 100%)`
+        }}
       >
         <div 
-          className="w-full h-full flex items-center justify-center text-6xl"
-          style={{ backgroundColor: category.color + '10' }}
+          className="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
+          style={{ backgroundColor: category.color }}
         >
-          {category.icon}
+          {category.name.charAt(0).toUpperCase()}
         </div>
         
         {/* Status Badge */}

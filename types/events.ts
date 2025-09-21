@@ -8,7 +8,6 @@ export interface IEventCategory {
   description: string;             // Category description
   slug: string;                    // URL-friendly version: "annual-day"
   color: string;                   // Theme color for the category
-  icon?: string;                   // Icon name or emoji
   isActive: boolean;               // Whether category is active
   createdBy: string;               // Admin ID who created
   createdAt: Date;
@@ -39,7 +38,7 @@ export interface IEvent {
   
   // Media
   coverImage?: string;             // Main event poster/image
-  gallery: IEventGalleryImage[];   // Event photos
+  gallery: IEventMediaItem[];      // Event photos and videos
   
   // Status
   status: 'draft' | 'published' | 'completed' | 'cancelled';
@@ -51,6 +50,20 @@ export interface IEvent {
   updatedAt: Date;
 }
 
+export interface IEventMediaItem {
+  _id?: string;
+  url: string;                     // Media URL (image or video)
+  type: 'image' | 'video';         // Media type
+  caption?: string;                // Optional media caption
+  altText?: string;                // Accessibility text (mainly for images)
+  thumbnail?: string;              // Thumbnail URL for videos
+  duration?: number;               // Video duration in seconds
+  featured: boolean;               // Whether media is featured
+  order: number;                   // Display order
+  uploadedAt: Date;
+}
+
+// Legacy interface for backward compatibility
 export interface IEventGalleryImage {
   _id?: string;
   url: string;                     // Image URL
@@ -79,7 +92,6 @@ export interface IEventCategoryForm {
   name: string;
   description: string;
   color: string;
-  icon?: string;
   coverImage?: File | string;
   isActive: boolean;
 }
@@ -97,8 +109,21 @@ export interface IEventForm {
   registrationRequired: boolean;
   registrationDeadline?: string;
   coverImage?: File | string;
+  media?: IEventMediaUpload[];     // Multiple media files (images/videos)
   status: 'draft' | 'published';
   featured: boolean;
+}
+
+// Media upload interface for forms
+export interface IEventMediaUpload {
+  file?: File;                     // File object for new uploads
+  url?: string;                    // URL for existing media
+  type: 'image' | 'video';         // Media type
+  caption?: string;                // Optional caption
+  altText?: string;                // Accessibility text
+  thumbnail?: File | string;       // Thumbnail for videos
+  featured: boolean;               // Whether media is featured
+  order: number;                   // Display order
 }
 
 // Filter types
@@ -116,3 +141,31 @@ export interface IEventCategoryFilters {
   isActive?: boolean;
   search?: string;
 }
+
+// Media-related constants and utilities
+export const SUPPORTED_IMAGE_FORMATS = ['jpg', 'jpeg', 'png', 'webp', 'gif'] as const;
+export const SUPPORTED_VIDEO_FORMATS = ['mp4', 'webm', 'mov', 'avi'] as const;
+
+export type SupportedImageFormat = typeof SUPPORTED_IMAGE_FORMATS[number];
+export type SupportedVideoFormat = typeof SUPPORTED_VIDEO_FORMATS[number];
+export type SupportedMediaFormat = SupportedImageFormat | SupportedVideoFormat;
+
+// Media validation interface
+export interface IMediaValidation {
+  maxFileSize: number;             // Maximum file size in bytes
+  maxDuration?: number;            // Maximum video duration in seconds
+  allowedFormats: SupportedMediaFormat[];
+}
+
+// Default media validation rules
+export const DEFAULT_MEDIA_VALIDATION: Record<'image' | 'video', IMediaValidation> = {
+  image: {
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    allowedFormats: [...SUPPORTED_IMAGE_FORMATS]
+  },
+  video: {
+    maxFileSize: 100 * 1024 * 1024, // 100MB
+    maxDuration: 300,                // 5 minutes
+    allowedFormats: [...SUPPORTED_VIDEO_FORMATS]
+  }
+};

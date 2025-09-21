@@ -92,7 +92,6 @@ const EventCard: React.FC<EventCardProps> = ({
               style={{ backgroundColor: event.category.color }}
             ></div>
             <span className="text-xs text-gray-500 font-medium">{event.category.name}</span>
-            <span className="text-xs">{event.category.icon}</span>
           </div>
         )}
 

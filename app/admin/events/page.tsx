@@ -284,7 +284,6 @@ const EventsPage = () => {
                   style={{ backgroundColor: event.category.color }}
                 ></div>
                 <span className="text-xs text-gray-500 font-medium">{event.category.name}</span>
-                <span className="text-xs">{event.category.icon}</span>
               </div>
 
               <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#7CBD1E] transition-colors">
