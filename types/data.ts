@@ -1,8 +1,7 @@
 export interface IAdmin {
-    _id: string;
+    _id?: string;
     name: string;
     email: string;
-    password: string;
     profile?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -15,6 +14,7 @@ export interface IResponse<T> {
 }
 export interface Ierror {
     status: number;
+    success: boolean;
     data: {
         errors: { field?: string; message: string }[];
     };

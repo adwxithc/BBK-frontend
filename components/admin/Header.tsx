@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bell, Search, Menu } from 'lucide-react';
 import { TabType } from '@/types/admin';
+import { getTabTitle, getTabDescription } from '@/utils/ui-utils';
 
 interface HeaderProps {
   activeTab: TabType;
@@ -8,15 +9,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ activeTab, setSidebarOpen }) => {
-  const getTitle = (tab: TabType) => {
-    return tab === 'overview' ? 'Dashboard Overview' : tab.charAt(0).toUpperCase() + tab.slice(1);
-  };
-
-  const getDescription = (tab: TabType) => {
-    return tab === 'overview' 
-      ? 'Welcome to your admin dashboard' 
-      : `Manage your ${tab} efficiently`;
-  };
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -33,10 +25,10 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setSidebarOpen }) => {
             
             <div>
               <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
-                {getTitle(activeTab)}
+                {getTabTitle(activeTab)}
               </h2>
               <p className="text-sm lg:text-base text-gray-600">
-                {getDescription(activeTab)}
+                {getTabDescription(activeTab)}
               </p>
             </div>
           </div>

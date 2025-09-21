@@ -1,9 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
-import { Menu, X, Bell, Search, Users, Calendar, ImageIcon, Settings, BarChart3 } from 'lucide-react';
+import { Menu, X, Bell, Search, Users, Calendar, ImageIcon, Settings, BarChart3, LogOut } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import { logout } from '@/redux/features/authSlice';
+import { useLogoutMutation } from '@/redux/features/adminApiSlice';
+import { RootState } from '@/redux/store';
+import { truncateEmail, getPageTitle, getPageDescription } from '@/utils/admin-utils';
 
 interface SidebarItem {
   id: string;
@@ -15,7 +22,26 @@ interface SidebarItem {
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [logoutApi] = useLogoutMutation();
+
+  const handleLogout = async () => {
+    setShowLogoutModal(false); // Close modal first
+    
+    try {
+      await logoutApi().unwrap();
+    } catch (error) {
+      console.log('Logout API error:', error);
+    } finally {
+      // Clear Redux state and redirect regardless of API response
+      dispatch(logout());
+      router.push('/login');
+    }
+  };
 
   const sidebarItems: SidebarItem[] = [
     { id: 'overview', label: 'Dashboard', icon: BarChart3, href: '/admin' },
@@ -25,22 +51,9 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { id: 'settings', label: 'Settings', icon: Settings, href: '/admin/settings' }
   ];
 
-  const getPageTitle = (path: string) => {
-    if (path === '/admin') return 'Dashboard Overview';
-    const segment = path.split('/admin/')[1];
-    if (!segment) return 'Dashboard Overview';
-    return segment.charAt(0).toUpperCase() + segment.slice(1);
-  };
-
-  const getPageDescription = (path: string) => {
-    if (path === '/admin') return 'Welcome to your admin dashboard';
-    const segment = path.split('/admin/')[1];
-    if (!segment) return 'Welcome to your admin dashboard';
-    return `Manage your ${segment} efficiently`;
-  };
-
   return (
-    <div className="h-screen bg-gray-50 flex overflow-hidden">
+    <ProtectedRoute>
+      <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <button 
@@ -125,13 +138,22 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         <div className={`p-4 border-t ${!sidebarHovered ? 'lg:p-2' : ''}`}>
           <div className={`flex items-center ${!sidebarHovered ? 'lg:justify-center' : 'space-x-3'}`}>
             <div className="h-10 w-10 rounded-full bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-sm font-medium">A</span>
+              <span className="text-white text-sm font-medium">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+              </span>
             </div>
             <div className={`flex-1 min-w-0 transition-all duration-300 overflow-hidden ${
               !sidebarHovered ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'
             }`}>
-              <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">Admin</p>
-              <p className="text-xs text-gray-500 truncate whitespace-nowrap">admin@bunnybabies.com</p>
+              <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">
+                {user?.name || 'Admin'}
+              </p>
+              <p 
+                className="text-xs text-gray-500 truncate whitespace-nowrap cursor-help"
+                title={user?.email || 'admin@bunnybabies.com'}
+              >
+                {user?.email ? truncateEmail(user.email) : 'admin@bunnybabies.com'}
+              </p>
             </div>
           </div>
         </div>
@@ -157,7 +179,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                     {getPageTitle(pathname)}
                   </h2>
                   <p className="text-sm lg:text-base text-gray-600">
-                    {getPageDescription(pathname)}
+                    {getPageDescription(pathname, user?.name)}
                   </p>
                 </div>
               </div>
@@ -175,6 +197,13 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                   <Bell className="h-5 w-5 lg:h-6 lg:w-6" />
                   <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
                 </button>
+                <button 
+                  onClick={() => setShowLogoutModal(true)}
+                  className="p-1.5 lg:p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5 lg:h-6 lg:w-6" />
+                </button>
               </div>
             </div>
           </div>
@@ -188,6 +217,19 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </main>
       </div>
     </div>
+    
+    {/* Logout Confirmation Modal */}
+    <ConfirmationModal
+      isOpen={showLogoutModal}
+      onClose={() => setShowLogoutModal(false)}
+      onConfirm={handleLogout}
+      title="Confirm Logout"
+      message="Are you sure you want to logout? You will need to sign in again to access the admin dashboard."
+      confirmText="Logout"
+      cancelText="Stay Logged In"
+      type="warning"
+    />
+    </ProtectedRoute>
   );
 };
 
