@@ -31,6 +31,13 @@ interface PaginationConfig {
   pageSize?: number;
   showPagination?: boolean;
   pageSizeOptions?: number[];
+  // External pagination control
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  // For server-side pagination
+  totalCount?: number;
+  serverSide?: boolean;
 }
 
 interface DataTableProps {
@@ -57,25 +64,45 @@ const DataTable: React.FC<DataTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(pagination.pageSize || 10);
 
+  // Use external currentPage if provided, otherwise use internal state
+  const effectiveCurrentPage = pagination.currentPage ?? currentPage;
+  const effectivePageSize = pagination.pageSize ?? pageSize;
+
   const paginatedData = useMemo(() => {
     if (!pagination.showPagination) return data;
     
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+    // If server-side pagination, don't slice data (it's already paginated)
+    if (pagination.serverSide) return data;
+    
+    const currentPageToUse = effectiveCurrentPage;
+    const pageSizeToUse = effectivePageSize;
+    
+    const startIndex = (currentPageToUse - 1) * pageSizeToUse;
+    const endIndex = startIndex + pageSizeToUse;
     return data.slice(startIndex, endIndex);
-  }, [data, currentPage, pageSize, pagination.showPagination]);
+  }, [data, effectiveCurrentPage, effectivePageSize, pagination.showPagination, pagination.serverSide]);
 
-  const totalPages = Math.ceil(data.length / pageSize);
-  const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, data.length);
+  // Calculate totals based on server-side or client-side pagination
+  const totalCount = pagination.totalCount ?? data.length;
+  const totalPages = Math.ceil(totalCount / effectivePageSize);
+  const startItem = (effectiveCurrentPage - 1) * effectivePageSize + 1;
+  const endItem = Math.min(effectiveCurrentPage * effectivePageSize, totalCount);
 
   const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    const newPage = Math.max(1, Math.min(page, totalPages));
+    
+    if (pagination.onPageChange) {
+      // External control
+      pagination.onPageChange(newPage);
+    } else {
+      // Internal control
+      setCurrentPage(newPage);
+    }
   };
 
   const skeletonRows = useMemo(() => 
-    Array.from({ length: pageSize }, (_, index) => ({ id: `skeleton-${index}` })),
-    [pageSize]
+    Array.from({ length: effectivePageSize }, (_, index) => ({ id: `skeleton-${index}` })),
+    [effectivePageSize]
   );
 
   const getPageNumbers = () => {
@@ -87,7 +114,7 @@ const DataTable: React.FC<DataTableProps> = ({
         pages.push(i);
       }
     } else {
-      const start = Math.max(1, currentPage - 2);
+      const start = Math.max(1, effectiveCurrentPage - 2);
       const end = Math.min(totalPages, start + maxVisiblePages - 1);
       
       for (let i = start; i <= end; i++) {
@@ -219,7 +246,7 @@ const DataTable: React.FC<DataTableProps> = ({
               <div className="text-sm text-gray-700">
                 Showing <span className="font-medium">{startItem}</span> to{' '}
                 <span className="font-medium">{endItem}</span> of{' '}
-                <span className="font-medium">{data.length}</span> results
+                <span className="font-medium">{totalCount}</span> results
               </div>
               
               {pagination.pageSizeOptions && (
@@ -227,10 +254,17 @@ const DataTable: React.FC<DataTableProps> = ({
                   <label htmlFor="pageSize" className="text-sm text-gray-700">Show:</label>
                   <select
                     id="pageSize"
-                    value={pageSize}
+                    value={effectivePageSize}
                     onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                      setCurrentPage(1);
+                      const newPageSize = Number(e.target.value);
+                      if (pagination.onPageSizeChange) {
+                        // External control
+                        pagination.onPageSizeChange(newPageSize);
+                      } else {
+                        // Internal control
+                        setPageSize(newPageSize);
+                        setCurrentPage(1);
+                      }
                     }}
                     className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   >
@@ -247,15 +281,15 @@ const DataTable: React.FC<DataTableProps> = ({
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => goToPage(1)}
-                disabled={currentPage === 1}
+                disabled={effectiveCurrentPage === 1}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronsLeft className="h-4 w-4" />
               </button>
               
               <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
+                onClick={() => goToPage(effectiveCurrentPage - 1)}
+                disabled={effectiveCurrentPage === 1}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -267,7 +301,7 @@ const DataTable: React.FC<DataTableProps> = ({
                     key={page}
                     onClick={() => goToPage(page)}
                     className={`py-1 px-3 text-sm rounded min-h-2 min-w-2 ${
-                      page === currentPage
+                      page === effectiveCurrentPage
                         ? 'bg-primary-500 text-white'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
@@ -278,8 +312,8 @@ const DataTable: React.FC<DataTableProps> = ({
               </div>
 
               <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                onClick={() => goToPage(effectiveCurrentPage + 1)}
+                disabled={effectiveCurrentPage === totalPages}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -287,7 +321,7 @@ const DataTable: React.FC<DataTableProps> = ({
               
               <button
                 onClick={() => goToPage(totalPages)}
-                disabled={currentPage === totalPages}
+                disabled={effectiveCurrentPage === totalPages}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronsRight className="h-4 w-4" />

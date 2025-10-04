@@ -8,6 +8,8 @@ import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import Select from '@/components/ui/Select';
 import TextField from '@/components/ui/TextField';
+import { useGetEventCategoriesQuery } from '@/redux/features/eventsApiSlice';
+import { IEventCategoriesData } from '@/types/events';
 
 // Mock data for development
 const mockEventCategories = [
@@ -138,6 +140,16 @@ const EventCategoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const { data, isLoading, error } = useGetEventCategoriesQuery({
+    search: searchTerm || undefined,
+    isActive: filterActive === 'all' ? undefined : filterActive === 'active',
+    page,
+    limit
+  });
+
 
   const filteredCategories = useMemo(() => {
     return mockEventCategories.filter(category => {
@@ -203,14 +215,17 @@ const EventCategoriesPage = () => {
     {
       key: 'createdAt',
       label: 'Created',
-      render: (value: Date) => (
-        <div className="text-sm text-gray-600">
-          <div>{value.toLocaleDateString()}</div>
-          <div className="text-xs text-gray-400">
-            {value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      render: (value: Date) => {
+        const date = new Date(value);
+        return (
+          <div className="text-sm text-gray-600">
+            <div>{date.toLocaleDateString()}</div>
+            <div className="text-xs text-gray-400">
+              {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       key: 'actions',
@@ -220,7 +235,7 @@ const EventCategoriesPage = () => {
         <div className="flex items-center justify-end gap-2">
           <IconButton
             icon={<Eye className="h-4 w-4" />}
-            onClick={() => handleViewCategory(row._id)}
+            onClick={() => handleViewCategory(row)}
             variant="text"
             color="blue"
             size="sm"
@@ -228,7 +243,7 @@ const EventCategoriesPage = () => {
           />
           <IconButton
             icon={<Edit className="h-4 w-4" />}
-            onClick={() => handleEditCategory(row._id)}
+            onClick={() => handleEditCategory(row)}
             variant="text"
             color="green"
             size="sm"
@@ -236,7 +251,7 @@ const EventCategoriesPage = () => {
           />
           <IconButton
             icon={<Trash2 className="h-4 w-4" />}
-            onClick={() => handleDeleteCategory(row._id)}
+            onClick={() => handleDeleteCategory(row)}
             variant="text"
             color="red"
             size="sm"
@@ -258,16 +273,16 @@ const EventCategoriesPage = () => {
     setShowCreateModal(true);
   };
 
-  const handleEditCategory = (categoryId: string) => {
-    console.log('Edit category:', categoryId);
+  const handleEditCategory = (category: IEventCategoriesData) => {
+    console.log('Edit category:', category);
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    console.log('Delete category:', categoryId);
+  const handleDeleteCategory = (category: IEventCategoriesData) => {
+    console.log('Delete category:', category);
   };
 
-  const handleViewCategory = (categoryId: string) => {
-    console.log('View category:', categoryId);
+  const handleViewCategory = (category: IEventCategoriesData) => {
+    console.log('View category:', category);
   };
 
   return (
@@ -321,9 +336,10 @@ const EventCategoriesPage = () => {
 
       {/* Categories Table */}
       <DataTable
-        data={filteredCategories}
+        data={data?.data?.categories || []}
         columns={columns}
         height="calc(100vh - 255px)"
+        loading={isLoading}
         emptyMessage={
           searchTerm || filterActive !== 'all'
             ? 'Try adjusting your search or filters'
@@ -331,7 +347,13 @@ const EventCategoriesPage = () => {
         }
         pagination={{
           showPagination: true,
-          pageSize: 10,
+          currentPage: page,
+          pageSize: limit,
+          onPageChange: setPage,
+          onPageSizeChange: (size) => {
+            setLimit(size);
+            setPage(1);
+          },
           pageSizeOptions: [5, 10, 20, 50]
         }}
       />
