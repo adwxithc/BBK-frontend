@@ -4,86 +4,203 @@ import { useState, useMemo, memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Container from './Container';
-import { Camera, Heart, Star } from 'lucide-react';
+import { Camera } from 'lucide-react';
+import { IEvent, IEventCategory } from '@/types/events';
 
-interface MediaItem {
-  id: number;
-  type: 'image' | 'video';
-  src: string;
-  thumbnail?: string;
-  title: string;
-  description: string;
-  category: string;
-  galleryRoute: string;
+interface EventDisplay extends IEvent {
+  categoryName: string;
+  categoryColor: string;
 }
 
-// Sample media data
-const mediaItems: MediaItem[] = [
+// Sample event categories
+const eventCategories: IEventCategory[] = [
   {
-    id: 1,
-    type: 'image',
-    src: '/hero1.webp',
-    title: 'Art & Creativity Time',
-    description: 'Children exploring their artistic side with colorful paints and crafts',
-    category: 'Creative Arts',
-    galleryRoute: 'art-creativity'
+    _id: '1',
+    name: 'Creative Arts',
+    description: 'Art and creativity activities',
+    slug: 'creative-arts',
+    color: '#FF6B6B',
+    isActive: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 2,
-    type: 'image',
-    src: '/hero2.webp',
-    title: 'Learning Through Play',
-    description: 'Interactive learning sessions that make education fun and engaging',
-    category: 'Educational Play',
-    galleryRoute: 'educational-play'
+    _id: '2',
+    name: 'Educational Play',
+    description: 'Learning through interactive play',
+    slug: 'educational-play',
+    color: '#4ECDC4',
+    isActive: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 3,
-    type: 'image',
-    src: '/hero3.webp',
-    title: 'Happy Moments',
-    description: 'Capturing the joy and laughter that fills our classrooms every day',
-    category: 'Daily Life',
-    galleryRoute: 'daily-life'
+    _id: '3',
+    name: 'Special Events',
+    description: 'Celebrations and special occasions',
+    slug: 'special-events',
+    color: '#9B59B6',
+    isActive: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 4,
-    type: 'image',
-    src: '/Group 12.webp',
-    title: 'Group Activities',
-    description: 'Building friendships and social skills through collaborative activities',
-    category: 'Social Development',
-    galleryRoute: 'social-development'
-  },
-  {
-    id: 5,
-    type: 'image',
-    src: '/kids.png',
-    title: 'Outdoor Adventures',
-    description: 'Fresh air and physical activities for healthy development',
-    category: 'Outdoor Play',
-    galleryRoute: 'outdoor-play'
-  },
-  {
-    id: 6,
-    type: 'image',
-    src: '/hero4.webp',
-    title: 'Christmas Celebration',
-    description: 'Festive joy and holiday spirit with our Christmas celebrations',
-    category: 'Special Events',
-    galleryRoute: 'christmas'
+    _id: '4',
+    name: 'Sports & Activities',
+    description: 'Physical activities and sports',
+    slug: 'sports-activities',
+    color: '#F39C12',
+    isActive: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
 ];
 
-const categories = ['All', 'Creative Arts', 'Educational Play', 'Daily Life', 'Social Development', 'Outdoor Play', 'Special Events'];
+// Sample events with enhanced display information
+const eventItems: EventDisplay[] = [
+  {
+    _id: '1',
+    title: 'Art & Creativity Workshop',
+    description: 'Children exploring their artistic side with colorful paints and crafts',
+    slug: 'art-creativity-workshop',
+    categoryId: '1',
+    categoryName: 'Creative Arts',
+    categoryColor: '#FF6B6B',
+    date: new Date('2025-10-15'),
+    time: '10:00 AM - 12:00 PM',
+    location: 'Art Room',
+    targetAgeGroups: ['3-4 years', '5-6 years'],
+    registrationRequired: false,
+    coverImage: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=500&h=300&fit=crop',
+    gallery: [],
+    status: 'published',
+    featured: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '2',
+    title: 'Interactive Learning Session',
+    description: 'Learning sessions that make education fun and engaging through play',
+    slug: 'interactive-learning-session',
+    categoryId: '2',
+    categoryName: 'Educational Play',
+    categoryColor: '#4ECDC4',
+    date: new Date('2025-10-20'),
+    time: '9:00 AM - 11:00 AM',
+    location: 'Main Classroom',
+    targetAgeGroups: ['All'],
+    registrationRequired: true,
+    registrationDeadline: new Date('2025-10-18'),
+    coverImage: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&h=300&fit=crop',
+    gallery: [],
+    status: 'published',
+    featured: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '3',
+    title: 'Christmas Celebration 2025',
+    description: 'Festive joy and holiday spirit with our annual Christmas celebrations',
+    slug: 'christmas-celebration-2025',
+    categoryId: '3',
+    categoryName: 'Special Events',
+    categoryColor: '#9B59B6',
+    date: new Date('2025-12-20'),
+    time: '2:00 PM - 5:00 PM',
+    location: 'Main Hall',
+    targetAgeGroups: ['All'],
+    registrationRequired: true,
+    registrationDeadline: new Date('2025-12-15'),
+    coverImage: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500&h=300&fit=crop',
+    gallery: [],
+    status: 'published',
+    featured: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '4',
+    title: 'Outdoor Sports Day',
+    description: 'Fresh air and physical activities for healthy development and fun',
+    slug: 'outdoor-sports-day',
+    categoryId: '4',
+    categoryName: 'Sports & Activities',
+    categoryColor: '#F39C12',
+    date: new Date('2025-11-10'),
+    time: '10:00 AM - 3:00 PM',
+    location: 'Playground',
+    targetAgeGroups: ['4-5 years', '5-6 years'],
+    registrationRequired: false,
+    coverImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=300&fit=crop',
+    gallery: [],
+    status: 'published',
+    featured: true,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '5',
+    title: 'Music & Dance Workshop',
+    description: 'Building confidence and creativity through music and movement',
+    slug: 'music-dance-workshop',
+    categoryId: '1',
+    categoryName: 'Creative Arts',
+    categoryColor: '#FF6B6B',
+    date: new Date('2025-11-25'),
+    time: '11:00 AM - 1:00 PM',
+    location: 'Activity Room',
+    targetAgeGroups: ['3-4 years', '4-5 years'],
+    registrationRequired: true,
+    coverImage: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&h=300&fit=crop',
+    gallery: [],
+    status: 'published',
+    featured: false,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '6',
+    title: 'Science Discovery Day',
+    description: 'Hands-on experiments and discoveries to spark curiosity',
+    slug: 'science-discovery-day',
+    categoryId: '2',
+    categoryName: 'Educational Play',
+    categoryColor: '#4ECDC4',
+    date: new Date('2025-12-05'),
+    time: '9:30 AM - 11:30 AM',
+    location: 'Science Corner',
+    targetAgeGroups: ['5-6 years'],
+    registrationRequired: true,
+    coverImage: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?w=500&h=300&fit=crop',
+    gallery: [],
+    status: 'published',
+    featured: false,
+    createdBy: 'admin',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+const allCategories = ['All', ...eventCategories.map(cat => cat.name)];
 
 function OurDays() {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const filteredMedia = useMemo(() => 
+  const filteredEvents = useMemo(() => 
     selectedCategory === 'All' 
-      ? mediaItems 
-      : mediaItems.filter(item => item.category === selectedCategory),
+      ? eventItems 
+      : eventItems.filter(event => event.categoryName === selectedCategory),
     [selectedCategory]
   );
 
@@ -125,7 +242,7 @@ function OurDays() {
 
         {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((category) => (
+          {allCategories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
@@ -140,8 +257,8 @@ function OurDays() {
           ))}
         </div>
 
-        {/* Media Grid */}
-        <MediaGrid filteredMedia={filteredMedia} />
+        {/* Events Grid */}
+        <EventsGrid filteredEvents={filteredEvents} />
 
         {/* Call to Action */}
         <CallToAction />
@@ -150,86 +267,136 @@ function OurDays() {
   );
 }
 
-// Memoized MediaGrid Component
-const MediaGrid = memo(({ filteredMedia }: {
-  filteredMedia: MediaItem[];
+// Memoized EventsGrid Component
+const EventsGrid = memo(({ filteredEvents }: {
+  filteredEvents: EventDisplay[];
 }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-    {filteredMedia.map((item, index) => (
-      <MediaCard key={item.id} item={item} index={index} />
+    {filteredEvents.map((event, index) => (
+      <EventCard key={event._id} event={event} index={index} />
     ))}
   </div>
 ));
-MediaGrid.displayName = 'MediaGrid';
+EventsGrid.displayName = 'EventsGrid';
 
-// Memoized MediaCard Component
-const MediaCard = memo(({ item, index }: {
-  item: MediaItem;
+// Memoized EventCard Component
+const EventCard = memo(({ event, index }: {
+  event: EventDisplay;
   index: number;
-}) => (
-  <Link href={`/gallery/${item.galleryRoute}`} className="block">
-    <div
-      className="group relative bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 cursor-pointer"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      {/* Media Container */}
-      <div className="relative aspect-square overflow-hidden">
-        <Image
-          src={item.src}
-          alt={item.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
-        {/* View Gallery Icon */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-            <Camera className="w-8 h-8 text-[#7CBD1E]" />
-          </div>
-        </div>
-        
-        {/* Media type indicator */}
-        <div className="absolute top-4 right-4">
-          <div className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md">
-            <Camera className="w-4 h-4 text-[#7CBD1E]" />
-          </div>
-        </div>
-      </div>
+}) => {
+  const eventDate = new Date(event.date);
+  const isUpcoming = eventDate > new Date();
+  const formattedDate = eventDate.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: 'numeric'
+  });
 
-      {/* Content */}
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs font-bold text-[#7CBD1E] bg-[#7CBD1E]/10 px-3 py-1 rounded-full">
-            {item.category}
-          </span>
-          <div className="flex items-center gap-1">
-            <Heart className="w-4 h-4 text-pink-400" />
-            <Star className="w-4 h-4 text-yellow-400" />
+  return (
+    <Link href={`/events/${event.slug}`} className="block">
+      <div
+        className="group relative bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 cursor-pointer"
+        style={{ animationDelay: `${index * 100}ms` }}
+      >
+        {/* Event Image */}
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <Image
+            src={event.coverImage || 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=500&h=300&fit=crop'}
+            alt={event.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          {/* View Event Icon */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+              <Camera className="w-8 h-8 text-[#7CBD1E]" />
+            </div>
+          </div>
+          
+          {/* Event Status Badge */}
+          <div className="absolute top-4 left-4">
+            <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+              isUpcoming 
+                ? 'bg-green-500/90 text-white' 
+                : 'bg-gray-500/90 text-white'
+            }`}>
+              {isUpcoming ? 'Upcoming' : 'Past Event'}
+            </div>
+          </div>
+
+          {/* Registration Required Badge */}
+          {event.registrationRequired && (
+            <div className="absolute top-4 right-4">
+              <div className="bg-orange-500/90 text-white px-2 py-1 rounded-full text-xs font-bold">
+                Registration Required
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Event Content */}
+        <div className="p-6">
+          {/* Category and Date Info */}
+          <div className="flex items-center justify-between mb-3">
+            <span 
+              className="text-xs font-bold px-3 py-1 rounded-full"
+              style={{ 
+                backgroundColor: `${event.categoryColor}15`,
+                color: event.categoryColor
+              }}
+            >
+              {event.categoryName}
+            </span>
+            <div className="flex items-center gap-1 text-gray-500 text-xs">
+              <span>📅</span>
+              <span>{formattedDate}</span>
+            </div>
+          </div>
+          
+          <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#7CBD1E] transition-colors duration-300">
+            {event.title}
+          </h3>
+          
+          <p className="text-gray-600 text-sm leading-relaxed mb-4 overflow-hidden" style={{ 
+            display: '-webkit-box', 
+            WebkitLineClamp: 2, 
+            WebkitBoxOrient: 'vertical' 
+          }}>
+            {event.description}
+          </p>
+
+          {/* Event Details */}
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span>🕒</span>
+              <span>{event.time}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span>📍</span>
+              <span>{event.location}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span>👥</span>
+              <span>{event.targetAgeGroups.join(', ')}</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center text-[#7CBD1E] text-sm font-medium">
+            <span>View Event Details</span>
+            <Camera className="w-4 h-4 ml-2" />
           </div>
         </div>
-        
-        <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#7CBD1E] transition-colors duration-300">
-          {item.title}
-        </h3>
-        
-        <p className="text-gray-600 text-sm leading-relaxed mb-4">
-          {item.description}
-        </p>
-        
-        <div className="flex items-center text-[#7CBD1E] text-sm font-medium">
-          <span>View Gallery</span>
-          <Camera className="w-4 h-4 ml-2" />
-        </div>
       </div>
-    </div>
-  </Link>
-));
-MediaCard.displayName = 'MediaCard';
+    </Link>
+  );
+});
+EventCard.displayName = 'EventCard';
 
 // Memoized CallToAction Component
 const CallToAction = memo(() => (
