@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
-import Input from '@/components/ui/Input';
+import TextField from '@/components/ui/TextField';
 import Button from '@/components/ui/Button';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -67,14 +67,14 @@ export default function LoginForm() {
                 </div>
             )}
             
-            <Input
+            <TextField
                 label="Email Address"
                 placeholder="Enter your email"
                 {...register('email')}
                 error={errors.email?.message}
             />
             
-            <Input
+            <TextField
                 label="Password"
                 type="password"
                 placeholder="Enter your password"
@@ -87,7 +87,8 @@ export default function LoginForm() {
                     loading={isLoading} 
                     type="submit" 
                     className="w-full"
-                    variant="primary"
+                    variant="contained"
+                    color="primary"
                     size="lg"
                 >
                     {isLoading ? 'Signing In...' : 'Sign In'}

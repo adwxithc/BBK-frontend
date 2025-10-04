@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, MoreVertical, Edit, Trash2, Eye, X } from 'lucide-react';
 import CreateEventCategoryModal from '@/components/admin/events/CreateEventCategoryModal';
 import DataTable from '@/components/admin/DataTable';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
+import Select from '@/components/ui/Select';
+import TextField from '@/components/ui/TextField';
 
 // Mock data for development
 const mockEventCategories = [
@@ -274,29 +276,35 @@ const EventCategoriesPage = () => {
 
       {/* Filters , Search and add new*/}
       <div className="mb-5 flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
+        <div className="flex-1">
+          <TextField
             type="text"
             placeholder="Search categories..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            startIcon={<Search className="h-4 w-4" />}
+            endIcon={searchTerm ? <X className="h-4 w-4" /> : undefined}
+            onEndIconClick={searchTerm ? () => setSearchTerm('') : undefined}
+            variant="modern"
+            size="md"
+            className="w-full"
           />
-
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="h-5 w-5 text-gray-400" />
-          <select
+          <Select
             value={filterActive}
-            onChange={(e) => setFilterActive(e.target.value as 'all' | 'active' | 'inactive')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          >
-            <option value="all">All Categories</option>
-            <option value="active">Active Only</option>
-            <option value="inactive">Inactive Only</option>
-          </select>
+            onChange={(value) => setFilterActive(value as 'all' | 'active' | 'inactive')}
+            options={[
+              { value: 'all', label: 'All Categories' },
+              { value: 'active', label: 'Active Only' },
+              { value: 'inactive', label: 'Inactive Only' }
+            ]}
+            variant="modern"
+            size="md"
+            color="primary"
+            className="min-w-[160px]"
+          />
         </div>
         <div className='flex items-center  gap-2'>
           <Button
