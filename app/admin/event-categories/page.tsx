@@ -275,7 +275,7 @@ const EventCategoriesPage = () => {
 
 
       {/* Filters , Search and add new*/}
-      <div className="mb-5 flex flex-col sm:flex-row gap-4">
+      <div className="mb-4 flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <TextField
             type="text"
