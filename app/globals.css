@@ -4,11 +4,6 @@
 
 /* Global Mobile Optimizations */
 @layer base {
-  /* Improve touch targets for mobile */
-  button, a {
-    min-height: 44px;
-    min-width: 44px;
-  }
   
   /* Better text readability and smooth scrolling */
   html {
