@@ -25,6 +25,9 @@ interface Column {
   label: string;
   render?: (value: any, row: any) => React.ReactNode;
   className?: string;
+  width?: string | number;        // Fixed width: "200px", "20%", 200
+  minWidth?: string | number;     // Minimum width: "100px", 100
+  maxWidth?: string | number;     // Maximum width: "300px", 300
 }
 
 interface PaginationConfig {
@@ -63,6 +66,23 @@ const DataTable: React.FC<DataTableProps> = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(pagination.pageSize || 10);
+
+  // Helper function to generate column width styles
+  const getColumnStyles = (column: Column): React.CSSProperties => {
+    const styles: React.CSSProperties = {};
+    
+    if (column.width) {
+      styles.width = typeof column.width === 'number' ? `${column.width}px` : column.width;
+    }
+    if (column.minWidth) {
+      styles.minWidth = typeof column.minWidth === 'number' ? `${column.minWidth}px` : column.minWidth;
+    }
+    if (column.maxWidth) {
+      styles.maxWidth = typeof column.maxWidth === 'number' ? `${column.maxWidth}px` : column.maxWidth;
+    }
+    
+    return styles;
+  };
 
   // Use external currentPage if provided, otherwise use internal state
   const effectiveCurrentPage = pagination.currentPage ?? currentPage;
@@ -136,32 +156,34 @@ const DataTable: React.FC<DataTableProps> = ({
           className="flex flex-col"
           style={containerStyle}
         >
-          {/* Fixed Header */}
-          <div className="flex-shrink-0 overflow-x-auto">
+          {/* Single Table with Sticky Header for Loading */}
+          <div className="flex-1 overflow-auto">
             <table className={`w-full ${tableClassName}`}>
+              {/* Sticky Header */}
               <thead className="bg-gray-200 border-b-2 border-gray-400 sticky top-0 z-10 shadow-md">
                 <tr>
                   {columns.map((column) => (
                     <th
                       key={column.key}
                       className={`text-left py-4 px-6 font-semibold text-gray-900 ${column.className || ''}`}
+                      style={getColumnStyles(column)}
                     >
                       {column.label}
                     </th>
                   ))}
                 </tr>
               </thead>
-            </table>
-          </div>
-          
-          {/* Scrollable Body */}
-          <div className="flex-1 overflow-auto">
-            <table className={`w-full ${tableClassName}`}>
+              
+              {/* Loading Skeleton Body */}
               <tbody>
                 {skeletonRows.map((skeletonRow) => (
                   <tr key={skeletonRow.id} className="border-b border-gray-100">
                     {columns.map((column) => (
-                      <td key={column.key} className="py-4 px-6">
+                      <td 
+                        key={column.key} 
+                        className="py-4 px-6"
+                        style={getColumnStyles(column)}
+                      >
                         <div className="animate-pulse bg-gray-200 h-4 rounded"></div>
                       </td>
                     ))}
@@ -186,25 +208,7 @@ const DataTable: React.FC<DataTableProps> = ({
         className="flex flex-col"
         style={containerStyle}
       >
-        {/* Fixed Header */}
-        <div className="flex-shrink-0 overflow-x-auto">
-          <table className={`w-full ${tableClassName}`}>
-            <thead className="bg-gray-100 border-b border-gray-300 sticky top-0 z-10 shadow-md">
-              <tr>
-                {columns.map((column) => (
-                  <th
-                    key={column.key}
-                    className={`text-left py-4 px-6 font-semibold text-gray-900 ${column.className || ''}`}
-                  >
-                    {column.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-          </table>
-        </div>
-        
-        {/* Scrollable Body or Empty State */}
+        {/* Scrollable Container with Single Table */}
         {data.length === 0 && !loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center py-12">
@@ -216,6 +220,22 @@ const DataTable: React.FC<DataTableProps> = ({
         ) : (
           <div className="flex-1 overflow-auto">
             <table className={`w-full ${tableClassName}`}>
+              {/* Sticky Header */}
+              <thead className="bg-gray-100 border-b border-gray-300 sticky top-0 z-10 shadow-md">
+                <tr>
+                  {columns.map((column) => (
+                    <th
+                      key={column.key}
+                      className={`text-left py-4 px-6 font-semibold text-gray-900 ${column.className || ''}`}
+                      style={getColumnStyles(column)}
+                    >
+                      {column.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              
+              {/* Table Body */}
               <tbody className="divide-y divide-gray-200">
                 {paginatedData.map((row, rowIndex) => (
                   <tr 
@@ -226,6 +246,7 @@ const DataTable: React.FC<DataTableProps> = ({
                       <td 
                         key={column.key} 
                         className={`py-4 px-6 ${column.className || ''}`}
+                        style={getColumnStyles(column)}
                       >
                         {column.render ? column.render(row[column.key], row) : row[column.key]}
                       </td>

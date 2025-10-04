@@ -10,6 +10,7 @@ import Select from '@/components/ui/Select';
 import TextField from '@/components/ui/TextField';
 import { useGetEventCategoriesQuery } from '@/redux/features/eventsApiSlice';
 import { IEventCategoriesData } from '@/types/events';
+import { dateFormatters } from '@/utils/date-utils';
 
 // Mock data for development
 const mockEventCategories = [
@@ -164,7 +165,7 @@ const EventCategoriesPage = () => {
 
   const columns = useMemo(() => [
     {
-      key: 'category',
+      key: 'name',
       label: 'Category',
       render: (value: any, row: any) => (
         <div className="flex items-center gap-4">
@@ -183,9 +184,10 @@ const EventCategoriesPage = () => {
     {
       key: 'description',
       label: 'Description',
+      maxWidth: 300,
       render: (value: string) => (
-        <p className="text-gray-600 text-sm leading-relaxed max-w-xs">
-          {value}
+        <p className="text-gray-600 text-sm leading-relaxed">
+          {value.length > 80 ? value.slice(0, 80).trim() + '...' : value}
         </p>
       ),
     },
@@ -216,12 +218,12 @@ const EventCategoriesPage = () => {
       key: 'createdAt',
       label: 'Created',
       render: (value: Date) => {
-        const date = new Date(value);
+        const formatted = dateFormatters.table(value);
         return (
           <div className="text-sm text-gray-600">
-            <div>{date.toLocaleDateString()}</div>
+            <div>{formatted.date}</div>
             <div className="text-xs text-gray-400">
-              {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {formatted.time}
             </div>
           </div>
         )
