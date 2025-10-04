@@ -142,7 +142,7 @@ const EditEventCategoryModal: React.FC<EditEventCategoryModalProps> = ({
           isActive: data.isActive,
         }
       }).unwrap();
-      
+
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
@@ -186,7 +186,7 @@ const EditEventCategoryModal: React.FC<EditEventCategoryModalProps> = ({
 
         {/* Success Message */}
         {showSuccess && (
-          <SuccessMessage 
+          <SuccessMessage
             message="Event category updated successfully!"
             className="mb-6"
           />
@@ -194,7 +194,7 @@ const EditEventCategoryModal: React.FC<EditEventCategoryModalProps> = ({
 
         {/* Error Message */}
         {apiError && (
-          <ApiError 
+          <ApiError
             error={apiError}
             className="mb-6"
             onClose={() => setApiError('')}
@@ -246,9 +246,8 @@ const EditEventCategoryModal: React.FC<EditEventCategoryModalProps> = ({
                 type="text"
                 id="slug"
                 {...register('slug')}
-                className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
-                  errors.slug ? 'border-red-300' : 'border-gray-300'
-                }`}
+                className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${errors.slug ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 placeholder="auto-generated-from-name"
                 maxLength={100}
               />

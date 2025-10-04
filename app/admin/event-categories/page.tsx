@@ -10,7 +10,8 @@ import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import Select from '@/components/ui/Select';
 import TextField from '@/components/ui/TextField';
-import { useGetEventCategoriesQuery } from '@/redux/features/eventsApiSlice';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import { useGetEventCategoriesQuery, useDeleteEventCategoryMutation } from '@/redux/features/eventsApiSlice';
 import { IEventCategory } from '@/types/events';
 import { dateFormatters } from '@/utils/date-utils';
 
@@ -145,6 +146,7 @@ const EventCategoriesPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<IEventCategory | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -155,6 +157,8 @@ const EventCategoriesPage = () => {
     page,
     limit
   });
+
+  const [deleteEventCategory, { isLoading: isDeleting }] = useDeleteEventCategoryMutation();
 
 
   const filteredCategories = useMemo(() => {
@@ -279,7 +283,28 @@ const EventCategoriesPage = () => {
   };
 
   const handleDeleteCategory = (category: IEventCategory) => {
-    console.log('Delete category:', category);
+    setSelectedCategory(category);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedCategory?._id) return;
+
+    try {
+      await deleteEventCategory(selectedCategory._id).unwrap();
+      setShowDeleteModal(false);
+      setSelectedCategory(null);
+      console.log('Category deleted successfully');
+      // Optionally show a success message or refetch data
+    } catch (error) {
+      console.error('Failed to delete category:', error);
+      // Optionally show an error message
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setSelectedCategory(null);
   };
 
   const handleViewCategory = (category: IEventCategory) => {
@@ -410,6 +435,22 @@ const EventCategoriesPage = () => {
           }}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        type="danger"
+        title="Delete Category"
+        message={
+          selectedCategory 
+            ? `Are you sure you want to delete the category "${selectedCategory.name}"? This action cannot be undone and may affect existing events associated with this category.`
+            : 'Are you sure you want to delete this category?'
+        }
+        confirmText={isDeleting ? "Deleting..." : "Delete Category"}
+        cancelText="Cancel"
+      />
     </div>
   );
 };

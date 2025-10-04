@@ -104,9 +104,8 @@ export type IApiErrorResponse = Ierror;
 export interface IEventCategoryForm {
   name: string;
   description: string;
-  slug?: string;                   // Optional - will be auto-generated if not provided
+  slug?: string;
   color: string;
-  coverImage?: File | string;
   isActive: boolean;
 }
 

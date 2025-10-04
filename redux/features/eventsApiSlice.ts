@@ -64,24 +64,20 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
             { id: string; data: IEventCategoryForm }
         >({
             query: ({ id, data }) => {
-                const formData = new FormData();
-
-                formData.append('name', data.name);
-                formData.append('description', data.description);
-                formData.append('color', data.color);
-                formData.append('isActive', data.isActive.toString());
-
-                if (data.coverImage instanceof File) {
-                    formData.append('coverImage', data.coverImage);
-                }
+                const newData = {
+                    name: data.name,
+                    description: data.description,
+                    slug: data.slug,
+                    color: data.color,
+                    isActive: data.isActive,
+                };
 
                 return {
-                    url: `/admin/event-categories/${id}`,
+                    url: `/admin/event-category/${id}`,
                     method: 'PUT',
-                    body: formData,
+                    body: newData,
                 };
             },
-            invalidatesTags: ['EventCategory', 'Event'],
         }),
 
         deleteEventCategory: builder.mutation<IEventCategoryResponse, string>({
