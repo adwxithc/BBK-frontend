@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, MoreVertical, Edit, Trash2, Eye, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, X } from 'lucide-react';
 import CreateEventCategoryModal from '@/components/admin/events/CreateEventCategoryModal';
+import CategoryDetailsModal from '@/components/admin/events/CategoryDetailsModal';
 import DataTable from '@/components/admin/DataTable';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import Select from '@/components/ui/Select';
 import TextField from '@/components/ui/TextField';
 import { useGetEventCategoriesQuery } from '@/redux/features/eventsApiSlice';
-import { IEventCategoriesData } from '@/types/events';
+import { IEventCategory } from '@/types/events';
 import { dateFormatters } from '@/utils/date-utils';
 
 // Mock data for development
@@ -141,10 +142,12 @@ const EventCategoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<IEventCategory | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const { data, isLoading, error } = useGetEventCategoriesQuery({
+  const { data, isLoading } = useGetEventCategoriesQuery({
     search: searchTerm || undefined,
     isActive: filterActive === 'all' ? undefined : filterActive === 'active',
     page,
@@ -259,13 +262,6 @@ const EventCategoriesPage = () => {
             size="sm"
             tooltip="Delete Category"
           />
-          <IconButton
-            icon={<MoreVertical className="h-4 w-4" />}
-            variant="text"
-            color="gray"
-            size="sm"
-            tooltip="More Options"
-          />
         </div>
       ),
     },
@@ -275,16 +271,17 @@ const EventCategoriesPage = () => {
     setShowCreateModal(true);
   };
 
-  const handleEditCategory = (category: IEventCategoriesData) => {
+  const handleEditCategory = (category: IEventCategory) => {
     console.log('Edit category:', category);
   };
 
-  const handleDeleteCategory = (category: IEventCategoriesData) => {
+  const handleDeleteCategory = (category: IEventCategory) => {
     console.log('Delete category:', category);
   };
 
-  const handleViewCategory = (category: IEventCategoriesData) => {
-    console.log('View category:', category);
+  const handleViewCategory = (category: IEventCategory) => {
+    setSelectedCategory(category);
+    setShowDetailsModal(true);
   };
 
   return (
@@ -384,6 +381,18 @@ const EventCategoriesPage = () => {
           console.log('Event category created successfully');
         }}
       />
+
+      {/* Category Details Modal */}
+      {selectedCategory && (
+        <CategoryDetailsModal
+          isOpen={showDetailsModal}
+          category={selectedCategory}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedCategory(null);
+          }}
+        />
+      )}
     </div>
   );
 };
