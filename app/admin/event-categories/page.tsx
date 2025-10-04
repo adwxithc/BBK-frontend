@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, X } from 'lucide-react';
 import CreateEventCategoryModal from '@/components/admin/events/CreateEventCategoryModal';
+import EditEventCategoryModal from '@/components/admin/events/EditEventCategoryModal';
 import CategoryDetailsModal from '@/components/admin/events/CategoryDetailsModal';
 import DataTable from '@/components/admin/DataTable';
 import Button from '@/components/ui/Button';
@@ -142,6 +143,7 @@ const EventCategoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<IEventCategory | null>(null);
   const [page, setPage] = useState(1);
@@ -272,7 +274,8 @@ const EventCategoriesPage = () => {
   };
 
   const handleEditCategory = (category: IEventCategory) => {
-    console.log('Edit category:', category);
+    setSelectedCategory(category);
+    setShowEditModal(true);
   };
 
   const handleDeleteCategory = (category: IEventCategory) => {
@@ -379,6 +382,20 @@ const EventCategoriesPage = () => {
         onSuccess={() => {
           // Optionally refresh the data or show a success message
           console.log('Event category created successfully');
+        }}
+      />
+
+      {/* Edit Event Category Modal */}
+      <EditEventCategoryModal
+        isOpen={showEditModal}
+        category={selectedCategory}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedCategory(null);
+        }}
+        onSuccess={() => {
+          // Optionally refresh the data or show a success message
+          console.log('Event category updated successfully');
         }}
       />
 
