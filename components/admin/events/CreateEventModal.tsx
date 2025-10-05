@@ -36,7 +36,12 @@ const schema = yup.object().shape({
     .required('Event date is required'),
   endDate: yup
     .string()
-    .optional(),
+    .optional()
+    .test('end-date-after-start', 'End date must be greater than or equal to start date', function(value) {
+      const { date } = this.parent;
+      if (!value || !date) return true; // Allow empty end date
+      return new Date(value) >= new Date(date);
+    }),
   time: yup
     .string()
     .required('Event time is required'),
@@ -84,6 +89,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     formState: { errors },
     reset,
     control,
+    watch,
   } = useForm<IEventForm>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
@@ -98,6 +104,9 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       featured: false,
     },
   });
+
+  // Watch the start date to set min date for end date
+  const startDate = watch('date');
 
   // Validate file size and type
   const validateFile = (file: File, type: 'image' | 'video'): string | null => {
@@ -352,42 +361,56 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           {/* Date & Time */}
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary-600" />
-              Date & Time
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              Date & Time Information
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <FormInput
-                  id="date"
-                  label="Start Date"
-                  type="date"
-                  registration={register('date')}
-                  error={errors.date}
-                  required
-                />
+            {/* Date Fields */}
+            <div className="space-y-6">
+              {/* Date Range Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Start Date */}
+                <div>
+                  <FormInput
+                    id="date"
+                    label="Event Start Date"
+                    type="date"
+                    registration={register('date')}
+                    error={errors.date}
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                    className="bg-white"
+                  />
+                </div>
+
+                {/* End Date */}
+                <div>
+                  <FormInput
+                    id="endDate"
+                    label="Event End Date"
+                    type="date"
+                    registration={register('endDate')}
+                    error={errors.endDate}
+                    min={startDate || new Date().toISOString().split('T')[0]}
+                    className="bg-white"
+                    helperText="Leave empty for single-day events"
+                  />
+                </div>
               </div>
 
-              <div>
-                <FormInput
-                  id="endDate"
-                  label="End Date (Optional)"
-                  type="date"
-                  registration={register('endDate')}
-                  error={errors.endDate}
-                />
-              </div>
-
+              {/* Time Section */}
               <div>
                 <FormInput
                   id="time"
-                  label="Time"
+                  label="Event Time"
                   registration={register('time')}
                   error={errors.time}
                   required
-                  placeholder="e.g., 10:00 AM - 4:00 PM"
+                  placeholder="e.g., 10:00 AM - 4:00 PM, All Day"
+                  className="bg-white"
+                  helperText="Specify the event duration or specific times"
                 />
               </div>
             </div>

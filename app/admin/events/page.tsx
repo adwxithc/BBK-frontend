@@ -161,9 +161,9 @@ const EventsPage = () => {
 
   const filteredEvents = mockEvents.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.category.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.category.name.toLowerCase().includes(searchTerm.toLowerCase());
+
     if (filterStatus === 'all') return matchesSearch;
     return matchesSearch && event.status === filterStatus;
   });
@@ -192,28 +192,9 @@ const EventsPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Events</h1>
-            <p className="text-gray-600 mt-1">Create and manage specific events with photos and details</p>
-          </div>
-          <Button
-            variant="contained"
-            color="primary"
-            size="lg"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Create Event
-          </Button>
-        </div>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="mb-6 flex flex-col lg:flex-row gap-4">
+    <div className="max-w-7xl mx-auto">
+      {/* Filters , Search and add new */}
+      <div className="mb-8 flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
@@ -224,7 +205,7 @@ const EventsPage = () => {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7CBD1E] focus:border-transparent"
           />
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5 text-gray-400" />
           <select
@@ -238,6 +219,17 @@ const EventsPage = () => {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="contained"
+            color="primary"
+            size="md"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Create Event
+          </Button>
         </div>
       </div>
 
@@ -256,7 +248,7 @@ const EventsPage = () => {
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              
+
               {/* Featured Badge */}
               {event.featured && (
                 <div className="absolute top-3 left-3">
@@ -287,7 +279,7 @@ const EventsPage = () => {
             <div className="p-6">
               {/* Category Tag */}
               <div className="flex items-center gap-2 mb-2">
-                <div 
+                <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: event.category.color }}
                 ></div>
@@ -297,7 +289,7 @@ const EventsPage = () => {
               <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#7CBD1E] transition-colors">
                 {event.title}
               </h3>
-              
+
               <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                 {event.description}
               </p>
@@ -308,12 +300,12 @@ const EventsPage = () => {
                   <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>{formatDate(event.date)} • {event.time}</span>
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
                   <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>{event.location}</span>
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
                   <Users className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>{event.targetAgeGroups.join(', ')}</span>
@@ -345,7 +337,7 @@ const EventsPage = () => {
           <div className="text-gray-400 text-6xl mb-4">📅</div>
           <h3 className="text-xl font-semibold text-gray-600 mb-2">No events found</h3>
           <p className="text-gray-500 mb-6">
-            {searchTerm || filterStatus !== 'all' 
+            {searchTerm || filterStatus !== 'all'
               ? 'Try adjusting your search or filters'
               : 'Create your first event to get started'
             }
