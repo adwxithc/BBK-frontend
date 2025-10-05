@@ -12,8 +12,6 @@ const baseQuery = fetchBaseQuery({ baseUrl: BASE_URL, credentials: 'include' });
 
 export const apiSlice = createApi({
     baseQuery: baseQuery,
-    tagTypes: ['admin', 'EventCategory', 'Event'],
-
     endpoints: () => ({}),
 });
 

@@ -25,12 +25,22 @@ interface Column {
   label: string;
   render?: (value: any, row: any) => React.ReactNode;
   className?: string;
+  width?: string | number;        // Fixed width: "200px", "20%", 200
+  minWidth?: string | number;     // Minimum width: "100px", 100
+  maxWidth?: string | number;     // Maximum width: "300px", 300
 }
 
 interface PaginationConfig {
   pageSize?: number;
   showPagination?: boolean;
   pageSizeOptions?: number[];
+  // External pagination control
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  // For server-side pagination
+  totalCount?: number;
+  serverSide?: boolean;
 }
 
 interface DataTableProps {
@@ -57,25 +67,62 @@ const DataTable: React.FC<DataTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(pagination.pageSize || 10);
 
+  // Helper function to generate column width styles
+  const getColumnStyles = (column: Column): React.CSSProperties => {
+    const styles: React.CSSProperties = {};
+    
+    if (column.width) {
+      styles.width = typeof column.width === 'number' ? `${column.width}px` : column.width;
+    }
+    if (column.minWidth) {
+      styles.minWidth = typeof column.minWidth === 'number' ? `${column.minWidth}px` : column.minWidth;
+    }
+    if (column.maxWidth) {
+      styles.maxWidth = typeof column.maxWidth === 'number' ? `${column.maxWidth}px` : column.maxWidth;
+    }
+    
+    return styles;
+  };
+
+  // Use external currentPage if provided, otherwise use internal state
+  const effectiveCurrentPage = pagination.currentPage ?? currentPage;
+  const effectivePageSize = pagination.pageSize ?? pageSize;
+
   const paginatedData = useMemo(() => {
     if (!pagination.showPagination) return data;
     
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+    // If server-side pagination, don't slice data (it's already paginated)
+    if (pagination.serverSide) return data;
+    
+    const currentPageToUse = effectiveCurrentPage;
+    const pageSizeToUse = effectivePageSize;
+    
+    const startIndex = (currentPageToUse - 1) * pageSizeToUse;
+    const endIndex = startIndex + pageSizeToUse;
     return data.slice(startIndex, endIndex);
-  }, [data, currentPage, pageSize, pagination.showPagination]);
+  }, [data, effectiveCurrentPage, effectivePageSize, pagination.showPagination, pagination.serverSide]);
 
-  const totalPages = Math.ceil(data.length / pageSize);
-  const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, data.length);
+  // Calculate totals based on server-side or client-side pagination
+  const totalCount = pagination.totalCount ?? data.length;
+  const totalPages = Math.ceil(totalCount / effectivePageSize);
+  const startItem = (effectiveCurrentPage - 1) * effectivePageSize + 1;
+  const endItem = Math.min(effectiveCurrentPage * effectivePageSize, totalCount);
 
   const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    const newPage = Math.max(1, Math.min(page, totalPages));
+    
+    if (pagination.onPageChange) {
+      // External control
+      pagination.onPageChange(newPage);
+    } else {
+      // Internal control
+      setCurrentPage(newPage);
+    }
   };
 
   const skeletonRows = useMemo(() => 
-    Array.from({ length: pageSize }, (_, index) => ({ id: `skeleton-${index}` })),
-    [pageSize]
+    Array.from({ length: effectivePageSize }, (_, index) => ({ id: `skeleton-${index}` })),
+    [effectivePageSize]
   );
 
   const getPageNumbers = () => {
@@ -87,7 +134,7 @@ const DataTable: React.FC<DataTableProps> = ({
         pages.push(i);
       }
     } else {
-      const start = Math.max(1, currentPage - 2);
+      const start = Math.max(1, effectiveCurrentPage - 2);
       const end = Math.min(totalPages, start + maxVisiblePages - 1);
       
       for (let i = start; i <= end; i++) {
@@ -109,32 +156,34 @@ const DataTable: React.FC<DataTableProps> = ({
           className="flex flex-col"
           style={containerStyle}
         >
-          {/* Fixed Header */}
-          <div className="flex-shrink-0 overflow-x-auto">
+          {/* Single Table with Sticky Header for Loading */}
+          <div className="flex-1 overflow-auto">
             <table className={`w-full ${tableClassName}`}>
+              {/* Sticky Header */}
               <thead className="bg-gray-200 border-b-2 border-gray-400 sticky top-0 z-10 shadow-md">
                 <tr>
                   {columns.map((column) => (
                     <th
                       key={column.key}
                       className={`text-left py-4 px-6 font-semibold text-gray-900 ${column.className || ''}`}
+                      style={getColumnStyles(column)}
                     >
                       {column.label}
                     </th>
                   ))}
                 </tr>
               </thead>
-            </table>
-          </div>
-          
-          {/* Scrollable Body */}
-          <div className="flex-1 overflow-auto">
-            <table className={`w-full ${tableClassName}`}>
+              
+              {/* Loading Skeleton Body */}
               <tbody>
                 {skeletonRows.map((skeletonRow) => (
                   <tr key={skeletonRow.id} className="border-b border-gray-100">
                     {columns.map((column) => (
-                      <td key={column.key} className="py-4 px-6">
+                      <td 
+                        key={column.key} 
+                        className="py-4 px-6"
+                        style={getColumnStyles(column)}
+                      >
                         <div className="animate-pulse bg-gray-200 h-4 rounded"></div>
                       </td>
                     ))}
@@ -159,25 +208,7 @@ const DataTable: React.FC<DataTableProps> = ({
         className="flex flex-col"
         style={containerStyle}
       >
-        {/* Fixed Header */}
-        <div className="flex-shrink-0 overflow-x-auto">
-          <table className={`w-full ${tableClassName}`}>
-            <thead className="bg-gray-100 border-b border-gray-300 sticky top-0 z-10 shadow-md">
-              <tr>
-                {columns.map((column) => (
-                  <th
-                    key={column.key}
-                    className={`text-left py-4 px-6 font-semibold text-gray-900 ${column.className || ''}`}
-                  >
-                    {column.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-          </table>
-        </div>
-        
-        {/* Scrollable Body or Empty State */}
+        {/* Scrollable Container with Single Table */}
         {data.length === 0 && !loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center py-12">
@@ -189,6 +220,22 @@ const DataTable: React.FC<DataTableProps> = ({
         ) : (
           <div className="flex-1 overflow-auto">
             <table className={`w-full ${tableClassName}`}>
+              {/* Sticky Header */}
+              <thead className="bg-gray-100 border-b border-gray-300 sticky top-0 z-10 shadow-md">
+                <tr>
+                  {columns.map((column) => (
+                    <th
+                      key={column.key}
+                      className={`text-left py-4 px-6 font-semibold text-gray-900 ${column.className || ''}`}
+                      style={getColumnStyles(column)}
+                    >
+                      {column.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              
+              {/* Table Body */}
               <tbody className="divide-y divide-gray-200">
                 {paginatedData.map((row, rowIndex) => (
                   <tr 
@@ -199,6 +246,7 @@ const DataTable: React.FC<DataTableProps> = ({
                       <td 
                         key={column.key} 
                         className={`py-4 px-6 ${column.className || ''}`}
+                        style={getColumnStyles(column)}
                       >
                         {column.render ? column.render(row[column.key], row) : row[column.key]}
                       </td>
@@ -219,7 +267,7 @@ const DataTable: React.FC<DataTableProps> = ({
               <div className="text-sm text-gray-700">
                 Showing <span className="font-medium">{startItem}</span> to{' '}
                 <span className="font-medium">{endItem}</span> of{' '}
-                <span className="font-medium">{data.length}</span> results
+                <span className="font-medium">{totalCount}</span> results
               </div>
               
               {pagination.pageSizeOptions && (
@@ -227,10 +275,17 @@ const DataTable: React.FC<DataTableProps> = ({
                   <label htmlFor="pageSize" className="text-sm text-gray-700">Show:</label>
                   <select
                     id="pageSize"
-                    value={pageSize}
+                    value={effectivePageSize}
                     onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                      setCurrentPage(1);
+                      const newPageSize = Number(e.target.value);
+                      if (pagination.onPageSizeChange) {
+                        // External control
+                        pagination.onPageSizeChange(newPageSize);
+                      } else {
+                        // Internal control
+                        setPageSize(newPageSize);
+                        setCurrentPage(1);
+                      }
                     }}
                     className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   >
@@ -247,15 +302,15 @@ const DataTable: React.FC<DataTableProps> = ({
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => goToPage(1)}
-                disabled={currentPage === 1}
+                disabled={effectiveCurrentPage === 1}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronsLeft className="h-4 w-4" />
               </button>
               
               <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
+                onClick={() => goToPage(effectiveCurrentPage - 1)}
+                disabled={effectiveCurrentPage === 1}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -267,7 +322,7 @@ const DataTable: React.FC<DataTableProps> = ({
                     key={page}
                     onClick={() => goToPage(page)}
                     className={`py-1 px-3 text-sm rounded min-h-2 min-w-2 ${
-                      page === currentPage
+                      page === effectiveCurrentPage
                         ? 'bg-primary-500 text-white'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
@@ -278,8 +333,8 @@ const DataTable: React.FC<DataTableProps> = ({
               </div>
 
               <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                onClick={() => goToPage(effectiveCurrentPage + 1)}
+                disabled={effectiveCurrentPage === totalPages}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -287,7 +342,7 @@ const DataTable: React.FC<DataTableProps> = ({
               
               <button
                 onClick={() => goToPage(totalPages)}
-                disabled={currentPage === totalPages}
+                disabled={effectiveCurrentPage === totalPages}
                 className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronsRight className="h-4 w-4" />

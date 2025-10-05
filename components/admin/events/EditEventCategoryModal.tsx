@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Save, RotateCcw } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { useCreateEventCategoryMutation } from '@/redux/features/eventsApiSlice';
+import { useUpdateEventCategoryMutation } from '@/redux/features/eventsApiSlice';
+import { IEventCategory } from '@/types/events';
 import ApiError from '@/components/ui/ApiError';
 import SuccessMessage from '@/components/ui/SuccessMessage';
 import FormInput from '@/components/ui/FormInput';
@@ -37,22 +38,24 @@ const schema = yup.object().shape({
   isActive: yup.boolean().default(true),
 });
 
-type CreateCategoryFormData = yup.InferType<typeof schema>;
+type EditCategoryFormData = yup.InferType<typeof schema>;
 
-interface CreateEventCategoryModalProps {
+interface EditEventCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  category: IEventCategory | null;
   refetchCategories: () => void;
 }
 
-const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
+const EditEventCategoryModal: React.FC<EditEventCategoryModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  refetchCategories,
+  category,
+  refetchCategories
 }) => {
-  const [createEventCategory, { isLoading }] = useCreateEventCategoryMutation();
+  const [updateEventCategory, { isLoading }] = useUpdateEventCategoryMutation();
   const [apiError, setApiError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -64,7 +67,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
     setValue,
     getValues,
     reset,
-  } = useForm<CreateCategoryFormData>({
+  } = useForm<EditCategoryFormData>({
     resolver: yupResolver(schema),
     defaultValues: {
       name: '',
@@ -77,6 +80,19 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
 
   // Only watch color for real-time preview
   const currentColor = watch('color');
+
+  // Populate form with category data when modal opens or category changes
+  useEffect(() => {
+    if (category && isOpen) {
+      reset({
+        name: category.name || '',
+        description: category.description || '',
+        slug: category.slug || '',
+        color: category.color || '#FF6B6B',
+        isActive: category.isActive ?? true,
+      });
+    }
+  }, [category, isOpen, reset]);
 
   // Generate slug from text
   const generateSlug = (text: string): string => {
@@ -107,15 +123,30 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
     if (error?.data?.message) {
       return error.data.message;
     }
-    return 'Failed to create event category. Please try again.';
+    return 'Failed to update event category. Please try again.';
   };
 
-  const onSubmit = async (data: CreateCategoryFormData) => {
+  const onSubmit = async (data: EditCategoryFormData) => {
+    if (!category?._id) {
+      setApiError('Category ID is missing. Please try again.');
+      return;
+    }
+
     try {
       setApiError('');
-      await createEventCategory(data).unwrap();
-      refetchCategories()
+      await updateEventCategory({
+        id: category._id,
+        data: {
+          name: data.name,
+          description: data.description,
+          slug: data.slug,
+          color: data.color,
+          isActive: data.isActive,
+        }
+      }).unwrap();
+
       setShowSuccess(true);
+      refetchCategories();
       setTimeout(() => {
         setShowSuccess(false);
         onSuccess?.();
@@ -124,7 +155,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
     } catch (err: any) {
       const errorMessage = getErrorMessage(err);
       setApiError(errorMessage);
-      console.error('Failed to create event category:', err);
+      console.error('Failed to update event category:', err);
     }
   };
 
@@ -135,14 +166,19 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !category) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Create Event Category</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Edit Event Category</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Update the details for &ldquo;{category.name}&rdquo;
+            </p>
+          </div>
           <button
             onClick={handleClose}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
@@ -154,7 +190,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
         {/* Success Message */}
         {showSuccess && (
           <SuccessMessage
-            message="Event category created successfully!"
+            message="Event category updated successfully!"
             className="mb-6"
           />
         )}
@@ -176,9 +212,10 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
             registration={{
               ...register('name', {
                 onChange: (e) => {
-                  // Auto-generate slug from name if slug is empty
+                  // Auto-generate slug from name if slug matches the original slug pattern
                   const currentSlug = getValues('slug');
-                  if (!currentSlug?.trim()) {
+                  const originalSlug = generateSlug(category.name);
+                  if (!currentSlug?.trim() || currentSlug === originalSlug) {
                     setValue('slug', generateSlug(e.target.value));
                   }
                 }
@@ -212,7 +249,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
                 type="text"
                 id="slug"
                 {...register('slug')}
-                className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#7CBD1E] focus:border-transparent transition-colors ${errors.slug ? 'border-red-300' : 'border-gray-300'
+                className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${errors.slug ? 'border-red-300' : 'border-gray-300'
                   }`}
                 placeholder="auto-generated-from-name"
                 maxLength={100}
@@ -246,12 +283,29 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
             required
           />
 
+          {/* Status Toggle */}
+          <div>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                {...register('isActive')}
+                className="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+              />
+              <div>
+                <span className="text-sm font-medium text-gray-700">Active Category</span>
+                <p className="text-xs text-gray-500">
+                  Only active categories will be available for creating new events
+                </p>
+              </div>
+            </label>
+          </div>
+
           {/* Form Actions */}
           <FormActions
             onCancel={handleClose}
             isLoading={isLoading}
-            submitText="Create Category"
-            loadingText="Creating..."
+            submitText="Update Category"
+            loadingText="Updating..."
             submitIcon={<Save className="w-5 h-5" />}
           />
         </form>
@@ -260,4 +314,4 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
   );
 };
 
-export default CreateEventCategoryModal;
+export default EditEventCategoryModal;

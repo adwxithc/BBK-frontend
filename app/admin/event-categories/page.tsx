@@ -1,13 +1,19 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, MoreVertical, Edit, Trash2, Eye, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, X } from 'lucide-react';
 import CreateEventCategoryModal from '@/components/admin/events/CreateEventCategoryModal';
+import EditEventCategoryModal from '@/components/admin/events/EditEventCategoryModal';
+import CategoryDetailsModal from '@/components/admin/events/CategoryDetailsModal';
 import DataTable from '@/components/admin/DataTable';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import Select from '@/components/ui/Select';
 import TextField from '@/components/ui/TextField';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import { useGetEventCategoriesQuery, useDeleteEventCategoryMutation } from '@/redux/features/eventsApiSlice';
+import { IEventCategory } from '@/types/events';
+import { dateFormatters } from '@/utils/date-utils';
 
 // Mock data for development
 const mockEventCategories = [
@@ -138,6 +144,22 @@ const EventCategoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<IEventCategory | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const { data, isLoading, refetch } = useGetEventCategoriesQuery({
+    search: searchTerm || undefined,
+    isActive: filterActive === 'all' ? undefined : filterActive === 'active',
+    page,
+    limit
+  });
+
+  const [deleteEventCategory, { isLoading: isDeleting }] = useDeleteEventCategoryMutation();
+
 
   const filteredCategories = useMemo(() => {
     return mockEventCategories.filter(category => {
@@ -152,7 +174,7 @@ const EventCategoriesPage = () => {
 
   const columns = useMemo(() => [
     {
-      key: 'category',
+      key: 'name',
       label: 'Category',
       render: (value: any, row: any) => (
         <div className="flex items-center gap-4">
@@ -171,9 +193,10 @@ const EventCategoriesPage = () => {
     {
       key: 'description',
       label: 'Description',
+      maxWidth: 300,
       render: (value: string) => (
-        <p className="text-gray-600 text-sm leading-relaxed max-w-xs">
-          {value}
+        <p className="text-gray-600 text-sm leading-relaxed">
+          {value.length > 80 ? value.slice(0, 80).trim() + '...' : value}
         </p>
       ),
     },
@@ -203,14 +226,17 @@ const EventCategoriesPage = () => {
     {
       key: 'createdAt',
       label: 'Created',
-      render: (value: Date) => (
-        <div className="text-sm text-gray-600">
-          <div>{value.toLocaleDateString()}</div>
-          <div className="text-xs text-gray-400">
-            {value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      render: (value: Date) => {
+        const formatted = dateFormatters.table(value);
+        return (
+          <div className="text-sm text-gray-600">
+            <div>{formatted.date}</div>
+            <div className="text-xs text-gray-400">
+              {formatted.time}
+            </div>
           </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       key: 'actions',
@@ -220,7 +246,7 @@ const EventCategoriesPage = () => {
         <div className="flex items-center justify-end gap-2">
           <IconButton
             icon={<Eye className="h-4 w-4" />}
-            onClick={() => handleViewCategory(row._id)}
+            onClick={() => handleViewCategory(row)}
             variant="text"
             color="blue"
             size="sm"
@@ -228,7 +254,7 @@ const EventCategoriesPage = () => {
           />
           <IconButton
             icon={<Edit className="h-4 w-4" />}
-            onClick={() => handleEditCategory(row._id)}
+            onClick={() => handleEditCategory(row)}
             variant="text"
             color="green"
             size="sm"
@@ -236,18 +262,11 @@ const EventCategoriesPage = () => {
           />
           <IconButton
             icon={<Trash2 className="h-4 w-4" />}
-            onClick={() => handleDeleteCategory(row._id)}
+            onClick={() => handleDeleteCategory(row)}
             variant="text"
             color="red"
             size="sm"
             tooltip="Delete Category"
-          />
-          <IconButton
-            icon={<MoreVertical className="h-4 w-4" />}
-            variant="text"
-            color="gray"
-            size="sm"
-            tooltip="More Options"
           />
         </div>
       ),
@@ -258,16 +277,39 @@ const EventCategoriesPage = () => {
     setShowCreateModal(true);
   };
 
-  const handleEditCategory = (categoryId: string) => {
-    console.log('Edit category:', categoryId);
+  const handleEditCategory = (category: IEventCategory) => {
+    setSelectedCategory(category);
+    setShowEditModal(true);
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    console.log('Delete category:', categoryId);
+  const handleDeleteCategory = (category: IEventCategory) => {
+    setSelectedCategory(category);
+    setShowDeleteModal(true);
   };
 
-  const handleViewCategory = (categoryId: string) => {
-    console.log('View category:', categoryId);
+  const handleConfirmDelete = async () => {
+    if (!selectedCategory?._id) return;
+
+    try {
+      await deleteEventCategory(selectedCategory._id).unwrap();
+      setShowDeleteModal(false);
+      setSelectedCategory(null);
+      refetch();
+      console.log('Category deleted successfully');
+      // Optionally show a success message or refetch data
+    } catch (error) {
+      console.error('Failed to delete category:', error);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setSelectedCategory(null);
+  };
+
+  const handleViewCategory = (category: IEventCategory) => {
+    setSelectedCategory(category);
+    setShowDetailsModal(true);
   };
 
   return (
@@ -275,7 +317,7 @@ const EventCategoriesPage = () => {
 
 
       {/* Filters , Search and add new*/}
-      <div className="mb-5 flex flex-col sm:flex-row gap-4">
+      <div className="mb-4 flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <TextField
             type="text"
@@ -321,9 +363,10 @@ const EventCategoriesPage = () => {
 
       {/* Categories Table */}
       <DataTable
-        data={filteredCategories}
+        data={data?.data?.categories || []}
         columns={columns}
         height="calc(100vh - 255px)"
+        loading={isLoading}
         emptyMessage={
           searchTerm || filterActive !== 'all'
             ? 'Try adjusting your search or filters'
@@ -331,7 +374,13 @@ const EventCategoriesPage = () => {
         }
         pagination={{
           showPagination: true,
-          pageSize: 10,
+          currentPage: page,
+          pageSize: limit,
+          onPageChange: setPage,
+          onPageSizeChange: (size) => {
+            setLimit(size);
+            setPage(1);
+          },
           pageSizeOptions: [5, 10, 20, 50]
         }}
       />
@@ -353,12 +402,56 @@ const EventCategoriesPage = () => {
 
       {/* Create Event Category Modal */}
       <CreateEventCategoryModal
+        refetchCategories={refetch}
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={() => {
           // Optionally refresh the data or show a success message
           console.log('Event category created successfully');
         }}
+      />
+
+      {/* Edit Event Category Modal */}
+      <EditEventCategoryModal
+        refetchCategories={refetch}
+        isOpen={showEditModal}
+        category={selectedCategory}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedCategory(null);
+        }}
+        onSuccess={() => {
+          // Optionally refresh the data or show a success message
+          console.log('Event category updated successfully');
+        }}
+      />
+
+      {/* Category Details Modal */}
+      {selectedCategory && (
+        <CategoryDetailsModal
+          isOpen={showDetailsModal}
+          category={selectedCategory}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedCategory(null);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        type="danger"
+        title="Delete Category"
+        message={
+          selectedCategory
+            ? `Are you sure you want to delete the category "${selectedCategory.name}"? This action cannot be undone and may affect existing events associated with this category.`
+            : 'Are you sure you want to delete this category?'
+        }
+        confirmText={isDeleting ? "Deleting..." : "Delete Category"}
+        cancelText="Cancel"
       />
     </div>
   );
