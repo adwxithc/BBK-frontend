@@ -151,7 +151,7 @@ const EventCategoriesPage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const { data, isLoading } = useGetEventCategoriesQuery({
+  const { data, isLoading, refetch } = useGetEventCategoriesQuery({
     search: searchTerm || undefined,
     isActive: filterActive === 'all' ? undefined : filterActive === 'active',
     page,
@@ -294,11 +294,11 @@ const EventCategoriesPage = () => {
       await deleteEventCategory(selectedCategory._id).unwrap();
       setShowDeleteModal(false);
       setSelectedCategory(null);
+      refetch();
       console.log('Category deleted successfully');
       // Optionally show a success message or refetch data
     } catch (error) {
       console.error('Failed to delete category:', error);
-      // Optionally show an error message
     }
   };
 
@@ -402,6 +402,7 @@ const EventCategoriesPage = () => {
 
       {/* Create Event Category Modal */}
       <CreateEventCategoryModal
+        refetchCategories={refetch}
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={() => {
@@ -412,6 +413,7 @@ const EventCategoriesPage = () => {
 
       {/* Edit Event Category Modal */}
       <EditEventCategoryModal
+        refetchCategories={refetch}
         isOpen={showEditModal}
         category={selectedCategory}
         onClose={() => {
@@ -444,7 +446,7 @@ const EventCategoriesPage = () => {
         type="danger"
         title="Delete Category"
         message={
-          selectedCategory 
+          selectedCategory
             ? `Are you sure you want to delete the category "${selectedCategory.name}"? This action cannot be undone and may affect existing events associated with this category.`
             : 'Are you sure you want to delete this category?'
         }

@@ -43,12 +43,14 @@ interface CreateEventCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  refetchCategories: () => void;
 }
 
 const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  refetchCategories,
 }) => {
   const [createEventCategory, { isLoading }] = useCreateEventCategoryMutation();
   const [apiError, setApiError] = useState<string>('');
@@ -112,7 +114,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
     try {
       setApiError('');
       await createEventCategory(data).unwrap();
-      
+      refetchCategories()
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
@@ -151,7 +153,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
 
         {/* Success Message */}
         {showSuccess && (
-          <SuccessMessage 
+          <SuccessMessage
             message="Event category created successfully!"
             className="mb-6"
           />
@@ -159,7 +161,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
 
         {/* Error Message */}
         {apiError && (
-          <ApiError 
+          <ApiError
             error={apiError}
             className="mb-6"
             onClose={() => setApiError('')}
@@ -210,9 +212,8 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
                 type="text"
                 id="slug"
                 {...register('slug')}
-                className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#7CBD1E] focus:border-transparent transition-colors ${
-                  errors.slug ? 'border-red-300' : 'border-gray-300'
-                }`}
+                className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#7CBD1E] focus:border-transparent transition-colors ${errors.slug ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 placeholder="auto-generated-from-name"
                 maxLength={100}
               />

@@ -31,13 +31,14 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                     url: `/admin/event-category?${params.toString()}`,
                 };
             },
+            keepUnusedDataFor: 0, // No caching - this is correct here
         }),
 
         getEventCategory: builder.query<IEventCategoryResponse, string>({
             query: (id) => ({
                 url: `/admin/event-categories/${id}`,
             }),
-            providesTags: ['EventCategory'],
+            keepUnusedDataFor: 0, // No caching - this is correct here
         }),
 
         createEventCategory: builder.mutation<
@@ -56,7 +57,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                     },
                 };
             },
-            invalidatesTags: ['EventCategory'],
         }),
 
         updateEventCategory: builder.mutation<
@@ -82,10 +82,9 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
 
         deleteEventCategory: builder.mutation<IEventCategoryResponse, string>({
             query: (id) => ({
-                url: `/admin/event-categories/${id}`,
+                url: `/admin/event-category/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['EventCategory', 'Event'],
         }),
 
         // Events
@@ -113,14 +112,12 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                     url: `/admin/events?${params.toString()}`,
                 };
             },
-            providesTags: ['Event'],
         }),
 
         getEvent: builder.query<IEventResponse, string>({
             query: (id) => ({
                 url: `/admin/events/${id}`,
             }),
-            providesTags: ['Event'],
         }),
 
         createEvent: builder.mutation<IEventResponse, IEventForm>({
@@ -168,7 +165,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                     body: formData,
                 };
             },
-            invalidatesTags: ['Event'],
         }),
 
         updateEvent: builder.mutation<
@@ -217,7 +213,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                     body: formData,
                 };
             },
-            invalidatesTags: ['Event'],
         }),
 
         deleteEvent: builder.mutation<IEventResponse, string>({
@@ -225,7 +220,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                 url: `/admin/events/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Event'],
         }),
 
         // Event Gallery Management
@@ -246,7 +240,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                     body: formData,
                 };
             },
-            invalidatesTags: ['Event'],
         }),
 
         deleteEventGalleryImage: builder.mutation<
@@ -257,7 +250,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                 url: `/admin/events/${eventId}/gallery/${imageId}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Event'],
         }),
 
         reorderEventGalleryImages: builder.mutation<
@@ -269,7 +261,6 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                 method: 'PUT',
                 body: { imageIds },
             }),
-            invalidatesTags: ['Event'],
         }),
     }),
 });

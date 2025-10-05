@@ -45,13 +45,15 @@ interface EditEventCategoryModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   category: IEventCategory | null;
+  refetchCategories: () => void;
 }
 
 const EditEventCategoryModal: React.FC<EditEventCategoryModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  category
+  category,
+  refetchCategories
 }) => {
   const [updateEventCategory, { isLoading }] = useUpdateEventCategoryMutation();
   const [apiError, setApiError] = useState<string>('');
@@ -144,6 +146,7 @@ const EditEventCategoryModal: React.FC<EditEventCategoryModalProps> = ({
       }).unwrap();
 
       setShowSuccess(true);
+      refetchCategories();
       setTimeout(() => {
         setShowSuccess(false);
         onSuccess?.();
