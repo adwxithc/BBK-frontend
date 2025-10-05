@@ -131,28 +131,10 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                 formData.append('date', event.date);
                 formData.append('time', event.time);
                 formData.append('location', event.location);
-                formData.append(
-                    'targetAgeGroups',
-                    JSON.stringify(event.targetAgeGroups)
-                );
-                formData.append(
-                    'registrationRequired',
-                    event.registrationRequired.toString()
-                );
                 formData.append('status', event.status);
                 formData.append('featured', event.featured.toString());
 
                 if (event.endDate) formData.append('endDate', event.endDate);
-                if (event.maxParticipants)
-                    formData.append(
-                        'maxParticipants',
-                        event.maxParticipants.toString()
-                    );
-                if (event.registrationDeadline)
-                    formData.append(
-                        'registrationDeadline',
-                        event.registrationDeadline
-                    );
 
                 // Handle file upload
                 if (event.coverImage instanceof File) {
@@ -180,28 +162,10 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                 formData.append('date', data.date);
                 formData.append('time', data.time);
                 formData.append('location', data.location);
-                formData.append(
-                    'targetAgeGroups',
-                    JSON.stringify(data.targetAgeGroups)
-                );
-                formData.append(
-                    'registrationRequired',
-                    data.registrationRequired.toString()
-                );
                 formData.append('status', data.status);
                 formData.append('featured', data.featured.toString());
 
                 if (data.endDate) formData.append('endDate', data.endDate);
-                if (data.maxParticipants)
-                    formData.append(
-                        'maxParticipants',
-                        data.maxParticipants.toString()
-                    );
-                if (data.registrationDeadline)
-                    formData.append(
-                        'registrationDeadline',
-                        data.registrationDeadline
-                    );
 
                 if (data.coverImage instanceof File) {
                     formData.append('coverImage', data.coverImage);

@@ -117,10 +117,6 @@ export interface IEventForm {
   endDate?: string;
   time: string;
   location: string;
-  targetAgeGroups: string[];
-  maxParticipants?: number;
-  registrationRequired: boolean;
-  registrationDeadline?: string;
   coverImage?: File | string;
   media?: IEventMediaUpload[];     // Multiple media files (images/videos)
   status: 'draft' | 'published';

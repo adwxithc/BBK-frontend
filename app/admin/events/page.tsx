@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Plus, Search, Filter, Calendar, MapPin, Users, Eye, Edit, Trash2 } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import CreateEventModal from '@/components/admin/events/CreateEventModal';
 
 // Mock data for development
 const mockEvents = [
@@ -155,6 +157,7 @@ const mockEvents = [
 const EventsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'published' | 'completed' | 'cancelled'>('all');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const filteredEvents = mockEvents.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -197,10 +200,15 @@ const EventsPage = () => {
             <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Events</h1>
             <p className="text-gray-600 mt-1">Create and manage specific events with photos and details</p>
           </div>
-          <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+          <Button
+            variant="contained"
+            color="primary"
+            size="lg"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <Plus className="h-5 w-5 mr-2" />
             Create Event
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -343,13 +351,28 @@ const EventsPage = () => {
             }
           </p>
           {(!searchTerm && filterStatus === 'all') && (
-            <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#7CBD1E] to-[#F1F864] text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+            <Button
+              variant="contained"
+              color="primary"
+              size="lg"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
               <Plus className="h-5 w-5 mr-2" />
               Create Your First Event
-            </button>
+            </Button>
           )}
         </div>
       )}
+
+      {/* Create Event Modal */}
+      <CreateEventModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => {
+          // Refresh events data here
+          console.log('Event created successfully');
+        }}
+      />
     </div>
   );
 };
