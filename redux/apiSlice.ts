@@ -5,6 +5,7 @@ import {
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL
+console.log('BASE_URL:', BASE_URL);
 
 const baseQuery = fetchBaseQuery({ baseUrl: BASE_URL, credentials: 'include' });
 
