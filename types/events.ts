@@ -72,12 +72,37 @@ export interface IEventCategoriesData {
     categories: IEventCategory[];
     pagination: IPagination;
 }
+export interface IFileUploadUrl {
+    key: string;
+    uploadId?: string;
+    parts?: { partNumber: number; url: string }[];
+    multipart: boolean;
+    type: string;
+    url?: string;
+    id: string;
+}
+
+export interface IMediaFileDetails {
+  contentType: string;
+  size: number;
+  type: 'image' | 'video';
+  id: string;
+}
+
+export interface IMediaUploadRequest {
+    title: string;
+    mediaFiles: IMediaFileDetails[];
+}
 
 // API Response types (using standard IResponse<T> format)
 export type IEventCategoryResponse = IResponse<IEventCategory>;
 export type IEventCategoriesResponse = IResponse<IEventCategoriesData>;
 export type IEventResponse = IResponse<IEvent>;
 export type IEventsResponse = IResponse<IEvent[]>;
+export type IMediaUploadUrlResponse = IResponse<{
+    title: string;
+    files: IFileUploadUrl[];
+}>;
 
 // Error Response types
 export type IApiErrorResponse = Ierror;
@@ -100,21 +125,32 @@ export interface IEventForm {
     time: string;
     location: string;
     coverImage?: File | string;
-    media?: IEventMediaUpload[]; // Multiple media files (images/videos)
+    medias?: MediaDetails[]; // Multiple media files (images/videos)
     status: 'draft' | 'published';
     featured: boolean;
 }
 
+export interface MediaDetails{
+    type: 'image' | 'video';
+    contentType: string;
+    key: string;
+    featured: boolean;
+    caption?: string;
+    multipart?: boolean;
+    uploadId?: string;
+    parts?: { partNumber: number; etag: string }[];
+}
+
 // Media upload interface for forms
 export interface IEventMediaUpload {
-    file?: File; // File object for new uploads
+    file: File; // File object for new uploads
     url?: string; // URL for existing media
     type: 'image' | 'video'; // Media type
     caption?: string; // Optional caption
-    altText?: string; // Accessibility text
     thumbnail?: File | string; // Thumbnail for videos
     featured: boolean; // Whether media is featured
     order: number; // Display order
+    id: string; // Unique identifier for the media item
 }
 
 // Filter types

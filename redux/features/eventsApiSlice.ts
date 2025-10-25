@@ -8,6 +8,8 @@ import {
     IEventForm,
     IEventFilters,
     IEventCategoryFilters,
+    IMediaUploadUrlResponse,
+    IMediaUploadRequest,
 } from '@/types/events';
 
 export const eventsApiSlice = apiSlice.injectEndpoints({
@@ -86,7 +88,16 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                 method: 'DELETE',
             }),
         }),
-
+        getMediaUploadUrl: builder.mutation<IMediaUploadUrlResponse, IMediaUploadRequest>({
+            query: ({ title, mediaFiles }) => ({
+                url: `/admin/event-media/signed-url`,
+                method: 'POST',
+                body: {
+                    title,
+                    mediaFiles,
+                },
+            }),
+        }),
         // Events
         getEvents: builder.query<IEventsResponse, IEventFilters | void>({
             query: (filters) => {
@@ -243,6 +254,9 @@ export const {
     useCreateEventMutation,
     useUpdateEventMutation,
     useDeleteEventMutation,
+
+    // Media Upload
+    useGetMediaUploadUrlMutation,
 
     // Event Gallery
     useUploadEventGalleryImagesMutation,
