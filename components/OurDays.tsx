@@ -10,6 +10,9 @@ import { IEvent, IEventCategory } from '@/types/events';
 interface EventDisplay extends IEvent {
   categoryName: string;
   categoryColor: string;
+  targetAgeGroups: string[];
+  registrationRequired?: boolean;
+  registrationDeadline?: Date;
 }
 
 // Sample event categories
