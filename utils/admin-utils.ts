@@ -121,69 +121,61 @@ export const uploadFileToS3 = async (
 };
 
 export async function uploadMultipartFileToS3(
-    file: File,
-    parts: { partNumber: number; url: string }[],
-    onProgress?: (progress: number) => void
+  file: File,
+  parts: { partNumber: number; url: string }[],
+  onProgress?: (progress: number) => void
 ): Promise<{
-    success: boolean;
-    parts: { PartNumber: number; ETag: string }[];
-    error?: string;
+  success: boolean;
+  parts: { PartNumber: number; ETag: string }[];
+  error?: string;
 }> {
-    try {
-        const partSize = Math.ceil(file.size / parts.length);
-        let uploaded = 0;
-        const uploadedParts: { PartNumber: number; ETag: string }[] = [];
+  try {
+    const partSize = Math.ceil(file.size / parts.length);
+    let uploaded = 0;
+    const uploadedParts: { PartNumber: number; ETag: string }[] = [];
 
-        for (let i = 0; i < parts.length; i++) {
-            const { url, partNumber } = parts[i];
-            const start = i * partSize;
-            const end = Math.min(start + partSize, file.size);
-            const partBlob = file.slice(start, end);
+    // Create all part promises
+    const partPromises = parts.map((partInfo, i) => {
+      const { url, partNumber } = partInfo;
+      const start = i * partSize;
+      const end = Math.min(start + partSize, file.size);
+      const partBlob = file.slice(start, end);
 
-            const xhr = new XMLHttpRequest();
-            const partPromise = new Promise<{
-                PartNumber: number;
-                ETag: string;
-            }>((resolve, reject) => {
-                xhr.upload.addEventListener('progress', (event) => {
-                    if (event.lengthComputable && onProgress) {
-                        uploaded += event.loaded;
-                        const progress = Math.round(
-                            (uploaded / file.size) * 100
-                        );
-                        onProgress(progress);
-                    }
-                });
-                xhr.onload = () => {
-                    const etag = xhr.getResponseHeader('ETag');
-                    if (
-                        xhr.status === 200 ||
-                        xhr.status === 201 ||
-                        xhr.status === 204
-                    ) {
-                        resolve({ PartNumber: partNumber, ETag: etag || '' });
-                    } else {
-                        reject(`Part ${i + 1} upload failed: ${xhr.status}`);
-                    }
-                };
-                xhr.onerror = () =>
-                    reject(`Part ${i + 1} upload failed: network error`);
-                xhr.open('PUT', url);
-                xhr.setRequestHeader('Content-Type', file.type);
-                xhr.send(partBlob);
-            });
-
-            const part = await partPromise;
-            uploadedParts.push(part);
-        }
-
-        return { success: true, parts: uploadedParts };
-    } catch (error) {
-        console.error('Multipart upload error:', error);
-        return {
-            success: false,
-            parts: [],
-            error: error instanceof Error ? error.message : String(error),
+      return new Promise<{ PartNumber: number; ETag: string }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable && onProgress) {
+            uploaded += event.loaded;
+            const progress = Math.round((uploaded / file.size) * 100);
+            onProgress(progress);
+          }
+        });
+        xhr.onload = () => {
+          const etag = xhr.getResponseHeader('ETag');
+          if (xhr.status === 200 || xhr.status === 201 || xhr.status === 204) {
+            resolve({ PartNumber: partNumber, ETag: etag || '' });
+          } else {
+            reject(`Part ${i + 1} upload failed: ${xhr.status}`);
+          }
         };
-    }
+        xhr.onerror = () => reject(`Part ${i + 1} upload failed: network error`);
+        xhr.open('PUT', url);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.send(partBlob);
+      });
+    });
+
+    // Wait for all parts to upload in parallel
+    const results = await Promise.all(partPromises);
+    uploadedParts.push(...results);
+
+    return { success: true, parts: uploadedParts };
+  } catch (error) {
+    console.error('Multipart upload error:', error);
+    return {
+      success: false,
+      parts: [],
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 }

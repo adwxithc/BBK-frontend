@@ -121,9 +121,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     },
   });
 
-  // Watch the start date to set min date for end date
-  const startDate = watch('date');
-
   // Validate file size and type
   const validateFile = (file: File, type: 'image' | 'video'): string | null => {
     const validation = DEFAULT_MEDIA_VALIDATION[type];
