@@ -719,7 +719,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       />
                     </label>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">Images up to 10MB, Videos up to 100MB each</p>
+                  <p className="text-sm text-gray-500 mt-1">Images up to 10MB, Videos up to 1GB each</p>
                 </div>
               </div>
 

@@ -83,10 +83,10 @@ export interface IFileUploadUrl {
 }
 
 export interface IMediaFileDetails {
-  contentType: string;
-  size: number;
-  type: 'image' | 'video';
-  id: string;
+    contentType: string;
+    size: number;
+    type: 'image' | 'video';
+    id: string;
 }
 
 export interface IMediaUploadRequest {
@@ -131,7 +131,7 @@ export interface IEventForm {
     slug: string;
 }
 
-export interface MediaDetails{
+export interface MediaDetails {
     type: 'image' | 'video';
     contentType: string;
     key: string;
@@ -203,8 +203,7 @@ export const DEFAULT_MEDIA_VALIDATION: Record<
         allowedFormats: [...SUPPORTED_IMAGE_FORMATS],
     },
     video: {
-        maxFileSize: 100 * 1024 * 1024, // 100MB
-        maxDuration: 300, // 5 minutes
+        maxFileSize: 1024 * 1024 * 1024, // 1GB
         allowedFormats: [...SUPPORTED_VIDEO_FORMATS],
     },
 };
