@@ -139,7 +139,7 @@ export interface MediaDetails{
     caption?: string;
     multipart?: boolean;
     uploadId?: string;
-    parts?: { partNumber: number; etag: string }[];
+    parts?: { PartNumber: number; ETag: string }[];
 }
 
 // Media upload interface for forms

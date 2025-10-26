@@ -260,14 +260,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         }
       });
 
-      let uploadedMediaUrls: { key: string; id: string; multipart: boolean, uploadId?: string, parts?: { partNumber: number; etag: string }[] }[] = [];
+      let uploadedMediaUrls: { key: string; id: string; multipart: boolean, uploadId?: string, parts?: { PartNumber: number; ETag: string }[] }[] = [];
 
       // Only get upload URLs and upload if there are files
       if (mediaFileDetails.length > 0) {
 
         // Get upload URLs from backend, sending identifiers
         const uploadUrlResponse = await getMediaUploadUrl({
-          title: data.title,
+          title: data.slug,
           mediaFiles: mediaFileDetails
         }).unwrap();
 
@@ -378,15 +378,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
       console.log('Creating event with data:', eventData);
 
-      // await createEvent(eventData).unwrap();
+      const response = await createEvent(eventData).unwrap();
       // refetch?.();
-
-      // setShowSuccess(true);
-      // setTimeout(() => {
-      //   setShowSuccess(false);
-      //   onSuccess?.();
-      //   handleClose();
-      // }, 2000);
+      console.log('Event created successfully:', response);
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onSuccess?.();
+        handleClose();
+      }, 2000);
     } catch (err: any) {
       const errorMessage = getErrorMessage(err);
       setApiError(errorMessage);

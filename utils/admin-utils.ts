@@ -126,24 +126,24 @@ export async function uploadMultipartFileToS3(
     onProgress?: (progress: number) => void
 ): Promise<{
     success: boolean;
-    parts: { partNumber: number; etag: string }[];
+    parts: { PartNumber: number; ETag: string }[];
     error?: string;
 }> {
     try {
         const partSize = Math.ceil(file.size / parts.length);
         let uploaded = 0;
-        const uploadedParts: { partNumber: number; etag: string }[] = [];
+        const uploadedParts: { PartNumber: number; ETag: string }[] = [];
 
         for (let i = 0; i < parts.length; i++) {
-            const { url } = parts[i];
+            const { url, partNumber } = parts[i];
             const start = i * partSize;
             const end = Math.min(start + partSize, file.size);
             const partBlob = file.slice(start, end);
 
             const xhr = new XMLHttpRequest();
             const partPromise = new Promise<{
-                partNumber: number;
-                etag: string;
+                PartNumber: number;
+                ETag: string;
             }>((resolve, reject) => {
                 xhr.upload.addEventListener('progress', (event) => {
                     if (event.lengthComputable && onProgress) {
@@ -161,7 +161,7 @@ export async function uploadMultipartFileToS3(
                         xhr.status === 201 ||
                         xhr.status === 204
                     ) {
-                        resolve({ partNumber: i + 1, etag: etag || '' });
+                        resolve({ PartNumber: partNumber, ETag: etag || '' });
                     } else {
                         reject(`Part ${i + 1} upload failed: ${xhr.status}`);
                     }

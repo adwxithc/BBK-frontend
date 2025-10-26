@@ -88,7 +88,10 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
                 method: 'DELETE',
             }),
         }),
-        getMediaUploadUrl: builder.mutation<IMediaUploadUrlResponse, IMediaUploadRequest>({
+        getMediaUploadUrl: builder.mutation<
+            IMediaUploadUrlResponse,
+            IMediaUploadRequest
+        >({
             query: ({ title, mediaFiles }) => ({
                 url: `/admin/event-media/signed-url`,
                 method: 'POST',
@@ -132,32 +135,11 @@ export const eventsApiSlice = apiSlice.injectEndpoints({
         }),
 
         createEvent: builder.mutation<IEventResponse, IEventForm>({
-            query: (event) => {
-                const formData = new FormData();
-
-                // Add form fields
-                formData.append('title', event.title);
-                formData.append('description', event.description);
-                formData.append('categoryId', event.categoryId);
-                formData.append('date', event.date);
-                formData.append('time', event.time);
-                formData.append('location', event.location);
-                formData.append('status', event.status);
-                formData.append('featured', event.featured.toString());
-
-                if (event.endDate) formData.append('endDate', event.endDate);
-
-                // Handle file upload
-                if (event.coverImage instanceof File) {
-                    formData.append('coverImage', event.coverImage);
-                }
-
-                return {
-                    url: '/admin/events',
-                    method: 'POST',
-                    body: formData,
-                };
-            },
+            query: (event) => ({
+                url: '/admin//event/create',
+                method: 'POST',
+                body: event,
+            }),
         }),
 
         updateEvent: builder.mutation<
