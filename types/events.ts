@@ -128,6 +128,7 @@ export interface IEventForm {
     medias?: MediaDetails[]; // Multiple media files (images/videos)
     status: 'draft' | 'published';
     featured: boolean;
+    slug: string;
 }
 
 export interface MediaDetails{

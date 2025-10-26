@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { X, Save, Calendar, Upload, Image as ImageIcon, Video, Trash2, Star } from 'lucide-react';
+import { X, Save, Calendar, Upload, Image as ImageIcon, Video, Trash2, Star, RotateCcw } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -16,6 +16,7 @@ import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import { generateUniqueId, uploadFileToS3, uploadMultipartFileToS3 } from '@/utils/admin-utils';
+import { generateSlug } from '@/utils/string-utils';
 
 // Validation schema
 const schema = yup.object().shape({
@@ -23,6 +24,12 @@ const schema = yup.object().shape({
     .string()
     .required('Event title is required')
     .max(200, 'Title must be 200 characters or less')
+    .trim(),
+  slug: yup
+    .string()
+    .required('Slug is required')
+    .max(100, 'Slug must be 100 characters or less')
+    .matches(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens')
     .trim(),
   description: yup
     .string()
@@ -96,10 +103,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     reset,
     control,
     watch,
+    getValues,
+    setValue
   } = useForm<IEventForm>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
       title: '',
+      slug: '',
       description: '',
       categoryId: '',
       date: '',
@@ -349,6 +359,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         location: data.location,
         status: data.status,
         featured: data.featured,
+        slug: data.slug,
         coverImage: uploadedMediaUrls.find(m => coverImage && m.id === coverImage.id)?.key,
         medias: uploadedMediaUrls.filter(m => m.id !== coverImage?.id).map(m => {
           const mediaFile = mediaFiles.find(f => f.id === m.id);
@@ -365,7 +376,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         }),
       };
 
-      // console.log('Creating event with data:', eventData);
+      console.log('Creating event with data:', eventData);
 
       // await createEvent(eventData).unwrap();
       // refetch?.();
@@ -385,7 +396,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setUploadProgress([]);
     }
   };
-
+  // Auto-generate slug from title
+  const handleAutoGenerateSlug = () => {
+    const currentTitle: string = getValues('title');
+    if (currentTitle?.trim()) {
+      const newSlug = generateSlug(currentTitle);
+      setValue('slug', newSlug);
+    }
+  };
   const handleClose = () => {
     reset();
     setCoverImage(null);
@@ -483,6 +501,37 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   placeholder="e.g., Annual Day 2025, Sports Championship"
                   maxLength={200}
                 />
+              </div>
+              <div className="md:col-span-2">
+                <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+                  URL Slug
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    id="slug"
+                    {...register('slug')}
+                    className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#7CBD1E] focus:border-transparent transition-colors ${errors.slug ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                    placeholder="auto-generated-from-name"
+                    maxLength={100}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAutoGenerateSlug}
+                    className="px-4 py-3 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl transition-colors flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                    title="Auto-generate slug from name"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Generate
+                  </button>
+                </div>
+                {errors.slug && (
+                  <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Auto-generated from name. Use lowercase letters, numbers, and hyphens only.
+                </p>
               </div>
 
               <div className="md:col-span-2">
