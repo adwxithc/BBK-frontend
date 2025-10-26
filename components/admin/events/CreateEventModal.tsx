@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { X, Save, Calendar, Upload, Image as ImageIcon, Video, Trash2, Star } from 'lucide-react';
+import { X, Save, Calendar, Upload, Image as ImageIcon, Video, Trash2, Star, RotateCcw } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Image from 'next/image';
-import { useCreateEventMutation, useGetEventCategoriesQuery } from '@/redux/features/eventsApiSlice';
-import { IEventForm, IEventMediaUpload, DEFAULT_MEDIA_VALIDATION } from '@/types/events';
+import { useCreateEventMutation, useGetEventCategoriesQuery, useGetMediaUploadUrlMutation } from '@/redux/features/eventsApiSlice';
+import { IEventForm, IEventMediaUpload, DEFAULT_MEDIA_VALIDATION, IMediaUploadRequest, IMediaFileDetails } from '@/types/events';
 import ApiError from '@/components/ui/ApiError';
 import SuccessMessage from '@/components/ui/SuccessMessage';
 import FormInput from '@/components/ui/FormInput';
@@ -15,6 +15,8 @@ import FormTextarea from '@/components/ui/FormTextarea';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
+import { generateUniqueId, uploadFileToS3, uploadMultipartFileToS3 } from '@/utils/admin-utils';
+import { generateSlug } from '@/utils/string-utils';
 
 // Validation schema
 const schema = yup.object().shape({
@@ -22,6 +24,12 @@ const schema = yup.object().shape({
     .string()
     .required('Event title is required')
     .max(200, 'Title must be 200 characters or less')
+    .trim(),
+  slug: yup
+    .string()
+    .required('Slug is required')
+    .max(100, 'Slug must be 100 characters or less')
+    .matches(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens')
     .trim(),
   description: yup
     .string()
@@ -37,7 +45,7 @@ const schema = yup.object().shape({
   endDate: yup
     .string()
     .optional()
-    .test('end-date-after-start', 'End date must be greater than or equal to start date', function(value) {
+    .test('end-date-after-start', 'End date must be greater than or equal to start date', function (value) {
       const { date } = this.parent;
       if (!value || !date) return true; // Allow empty end date
       return new Date(value) >= new Date(date);
@@ -71,12 +79,17 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   refetch,
 }) => {
   const [createEvent, { isLoading }] = useCreateEventMutation();
+  const [getMediaUploadUrl] = useGetMediaUploadUrlMutation();
   const { data: categoriesData } = useGetEventCategoriesQuery({});
   const [apiError, setApiError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
-  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverImage, setCoverImage] = useState<{ id: string; file: File } | null>(null);
   const [mediaFiles, setMediaFiles] = useState<IEventMediaUpload[]>([]);
   const [coverImagePreview, setCoverImagePreview] = useState<string>('');
+
+  // Upload state
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ fileName: string, progress: number }[]>([]);
 
   const categoryOptions = categoriesData?.data?.categories?.filter(cat => cat.isActive).map(category => ({
     value: category._id!,
@@ -90,10 +103,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     reset,
     control,
     watch,
+    getValues,
+    setValue
   } = useForm<IEventForm>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
       title: '',
+      slug: '',
       description: '',
       categoryId: '',
       date: '',
@@ -105,13 +121,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     },
   });
 
-  // Watch the start date to set min date for end date
-  const startDate = watch('date');
-
   // Validate file size and type
   const validateFile = (file: File, type: 'image' | 'video'): string | null => {
     const validation = DEFAULT_MEDIA_VALIDATION[type];
-    
+
     if (file.size > validation.maxFileSize) {
       const maxSizeMB = validation.maxFileSize / (1024 * 1024);
       return `File size must be less than ${maxSizeMB}MB`;
@@ -134,8 +147,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         setApiError(validationError);
         return;
       }
-      
-      setCoverImage(file);
+
+      setCoverImage({ id: generateUniqueId(), file });
       const reader = new FileReader();
       reader.onload = (e) => {
         setCoverImagePreview(e.target?.result as string);
@@ -148,11 +161,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   // Handle media files upload
   const handleMediaUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    
+
     files.forEach((file) => {
       const type: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image';
       const validationError = validateFile(file, type);
-      
+
       if (validationError) {
         setApiError(validationError);
         return;
@@ -162,14 +175,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         file,
         type,
         caption: '',
-        altText: '',
         featured: false,
         order: mediaFiles.length,
+        id: generateUniqueId(),
       };
 
       setMediaFiles(prev => [...prev, mediaUpload]);
     });
-    
+
     // Clear the input
     event.target.value = '';
   }, [mediaFiles.length]);
@@ -180,19 +193,21 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   }, []);
 
   // Toggle featured media
-  const toggleFeaturedMedia = useCallback((index: number) => {
-    setMediaFiles(prev => prev.map((media, i) => ({
+  const toggleFeaturedMedia = useCallback((id: string) => {
+    setMediaFiles(prev => prev.map(media => ({
       ...media,
-      featured: i === index ? !media.featured : media.featured
+      featured: media.id === id ? !media.featured : media.featured
     })));
   }, []);
 
   // Update media caption
   const updateMediaCaption = useCallback((index: number, caption: string) => {
-    setMediaFiles(prev => prev.map((media, i) => 
+    setMediaFiles(prev => prev.map((media, i) =>
       i === index ? { ...media, caption } : media
     ));
   }, []);
+
+
 
   // Extract error message from API error response
   const getErrorMessage = (error: any): string => {
@@ -208,7 +223,129 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const onSubmit = async (data: IEventForm) => {
     try {
       setApiError('');
-      
+      setIsUploading(true);
+      setUploadProgress([]);
+
+      // Prepare media files for upload URL request
+      // const allFiles: File[] = [];
+      const mediaFileDetails: IMediaFileDetails[] = [];
+
+
+
+      // Add cover image to files list
+      if (coverImage) {
+        // allFiles.push(coverImage);
+        mediaFileDetails.push({
+          contentType: coverImage.file.type,
+          size: coverImage.file.size,
+          type: 'image',
+          id: coverImage.id,
+        });
+      }
+
+      // Add media files to the list
+      mediaFiles.forEach(media => {
+        if (media.file) {
+
+          // allFiles.push(media.file);
+          mediaFileDetails.push({
+            contentType: media.file.type,
+            size: media.file.size,
+            type: media.type,
+            id: media.id,
+          });
+        }
+      });
+
+      let uploadedMediaUrls: { key: string; id: string; multipart: boolean, uploadId?: string, parts?: { PartNumber: number; ETag: string }[] }[] = [];
+
+      // Only get upload URLs and upload if there are files
+      if (mediaFileDetails.length > 0) {
+
+        // Get upload URLs from backend, sending identifiers
+        const uploadUrlResponse = await getMediaUploadUrl({
+          title: data.slug,
+          mediaFiles: mediaFileDetails
+        }).unwrap();
+
+        // Response should include identifier and url for each part
+        const uploadUrls = uploadUrlResponse.data.files;
+        console.log('Received upload URLs:', uploadUrls);
+        let coverImageFile: { file: File; id: string } | undefined;
+        if (coverImage) {
+          coverImageFile = {
+            file: coverImage.file!,
+            id: coverImage.id,
+          };
+        }
+        // Upload all files
+        const uploadPromises = [...mediaFiles, ...(coverImageFile ? [coverImageFile] : [])].map(async (mediaFile) => {
+          const uploadObj = uploadUrls.find((u: any) => u.id === mediaFile.id);
+          if (!uploadObj || !(uploadObj.multipart ? uploadObj.parts : uploadObj.url)) {
+            throw new Error(`No upload URL received for file: ${mediaFile.file.name}`);
+          }
+
+          // Initialize progress tracking
+          setUploadProgress(prev => [...prev, {
+            fileName: mediaFile.file.name,
+            progress: 0
+          }]);
+          if (uploadObj.multipart && uploadObj.parts) {
+            const result = await uploadMultipartFileToS3(
+              mediaFile.file,
+              uploadObj.parts,
+              (progress) => {
+                setUploadProgress(prev => prev.map(p =>
+                  p.fileName === mediaFile.file.name
+                    ? { ...p, progress }
+                    : p
+                ));
+              }
+            );
+            console.log('Multipart upload result:', result);
+            if (!result.success) throw new Error(`Failed to upload multipart file: ${result.error}`);
+            // After all parts are uploaded, call your backend to complete the multipart upload
+            // Pass: uploadObj.uploadId, uploadObj.key, result.etags, etc.
+            return {
+              key: uploadObj.key, // S3 key for the video
+              parts: result.parts,
+              uploadId: uploadObj.uploadId,
+              id: uploadObj.id,
+              multipart: true
+            };
+          } else {
+
+            const uploadResult = await uploadFileToS3(
+              mediaFile.file,
+              uploadObj.url!,
+              (progress) => {
+                setUploadProgress(prev => prev.map(p =>
+                  p.fileName === mediaFile.file.name
+                    ? { ...p, progress }
+                    : p
+                ));
+              }
+            );
+
+            if (!uploadResult.success) {
+              throw new Error(`Failed to upload ${mediaFile.file.name}: ${uploadResult.error}`);
+            }
+
+            // Return the final S3 URL and identifier
+            return {
+              key: uploadObj.key,
+              id: uploadObj.id,
+              multipart: false
+            };
+          }
+        });
+
+        uploadedMediaUrls = await Promise.all(uploadPromises);
+        console.log('All files uploaded successfully:', uploadedMediaUrls);
+      }
+
+      // Prepare final event data with uploaded URLs
+
       const eventData: IEventForm = {
         title: data.title,
         description: data.description,
@@ -219,13 +356,28 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
         location: data.location,
         status: data.status,
         featured: data.featured,
-        coverImage: coverImage || undefined,
-        media: mediaFiles,
+        slug: data.slug,
+        coverImage: uploadedMediaUrls.find(m => coverImage && m.id === coverImage.id)?.key,
+        medias: uploadedMediaUrls.filter(m => m.id !== coverImage?.id).map(m => {
+          const mediaFile = mediaFiles.find(f => f.id === m.id);
+          return {
+            key: m.key,
+            featured: mediaFile?.featured || false,
+            caption: mediaFile?.caption || '',
+            type: mediaFile?.type || 'image',
+            contentType: mediaFile?.file.type || '',
+            multipart: m.multipart,
+            uploadId: m.uploadId,
+            parts: m.parts,
+          };
+        }),
       };
 
-      await createEvent(eventData).unwrap();
-      refetch?.();
-      
+      console.log('Creating event with data:', eventData);
+
+      const response = await createEvent(eventData).unwrap();
+      // refetch?.();
+      console.log('Event created successfully:', response);
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
@@ -236,9 +388,19 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
       const errorMessage = getErrorMessage(err);
       setApiError(errorMessage);
       console.error('Failed to create event:', err);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress([]);
     }
   };
-
+  // Auto-generate slug from title
+  const handleAutoGenerateSlug = () => {
+    const currentTitle: string = getValues('title');
+    if (currentTitle?.trim()) {
+      const newSlug = generateSlug(currentTitle);
+      setValue('slug', newSlug);
+    }
+  };
   const handleClose = () => {
     reset();
     setCoverImage(null);
@@ -246,10 +408,15 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
     setMediaFiles([]);
     setApiError('');
     setShowSuccess(false);
+    setIsUploading(false);
+    setUploadProgress([]);
     onClose();
   };
 
   if (!isOpen) return null;
+
+  // Calculate if form is submitting (uploading or creating)
+  const isSubmitting = isUploading || isLoading;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -266,15 +433,38 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
           <button
             onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            disabled={isSubmitting}
+            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
+        {/* Upload Progress */}
+        {isUploading && (
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+            <h4 className="text-sm font-medium text-blue-900 mb-2">Uploading Files...</h4>
+
+            {uploadProgress.map((progress, index) => (
+              <div key={`upload-${index}`} className="mb-2">
+                <div className="flex justify-between text-xs text-blue-700 mb-1">
+                  <span>{progress.fileName}</span>
+                  <span>{progress.progress}%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progress.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Success Message */}
         {showSuccess && (
-          <SuccessMessage 
+          <SuccessMessage
             message="Event created successfully!"
             className="mb-6"
           />
@@ -282,7 +472,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
         {/* Error Message */}
         {apiError && (
-          <ApiError 
+          <ApiError
             error={apiError}
             className="mb-6"
             onClose={() => setApiError('')}
@@ -296,7 +486,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               <Calendar className="w-5 h-5 text-primary-600" />
               Basic Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <FormInput
@@ -308,6 +498,37 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   placeholder="e.g., Annual Day 2025, Sports Championship"
                   maxLength={200}
                 />
+              </div>
+              <div className="md:col-span-2">
+                <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+                  URL Slug
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    id="slug"
+                    {...register('slug')}
+                    className={`flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#7CBD1E] focus:border-transparent transition-colors ${errors.slug ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                    placeholder="auto-generated-from-name"
+                    maxLength={100}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAutoGenerateSlug}
+                    className="px-4 py-3 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl transition-colors flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                    title="Auto-generate slug from name"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Generate
+                  </button>
+                </div>
+                {errors.slug && (
+                  <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Auto-generated from name. Use lowercase letters, numbers, and hyphens only.
+                </p>
               </div>
 
               <div className="md:col-span-2">
@@ -361,12 +582,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           {/* Date & Time */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+          <div className="bg-gray-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-600" />
+              <Calendar className="w-5 h-5 text-primary-600" />
               Date & Time Information
             </h3>
-            
+
             {/* Date Fields */}
             <div className="space-y-6">
               {/* Date Range Section */}
@@ -380,7 +601,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     registration={register('date')}
                     error={errors.date}
                     required
-                    min={new Date().toISOString().split('T')[0]}
+                    max={watch('endDate') || undefined}
                     className="bg-white"
                   />
                 </div>
@@ -393,7 +614,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     type="date"
                     registration={register('endDate')}
                     error={errors.endDate}
-                    min={startDate || new Date().toISOString().split('T')[0]}
+                    min={watch('date') || undefined}
                     className="bg-white"
                     helperText="Leave empty for single-day events"
                   />
@@ -422,7 +643,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               <ImageIcon className="w-5 h-5 text-primary-600" />
               Media & Images
             </h3>
-            
+
             {/* Cover Image */}
             <div className="mb-6">
               <span className="block text-sm font-medium text-gray-700 mb-2">
@@ -448,6 +669,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         setCoverImagePreview('');
                       }}
                       className="mt-2"
+                      disabled={isSubmitting}
                     >
                       Remove
                     </Button>
@@ -456,13 +678,14 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   <div>
                     <Upload className="mx-auto h-12 w-12 text-gray-400" />
                     <div className="mt-4">
-                      <label className="cursor-pointer">
+                      <label className={`cursor-pointer ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}>
                         <span className="text-primary-600 hover:text-primary-500">Upload cover image</span>
                         <input
                           type="file"
                           className="hidden"
                           accept="image/*"
                           onChange={handleCoverImageUpload}
+                          disabled={isSubmitting}
                         />
                       </label>
                     </div>
@@ -481,7 +704,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                 <div>
                   <Upload className="mx-auto h-8 w-8 text-gray-400" />
                   <div className="mt-2">
-                    <label className="cursor-pointer">
+                    <label className={`cursor-pointer ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}>
                       <span className="text-primary-600 hover:text-primary-500">Upload media files</span>
                       <input
                         type="file"
@@ -489,10 +712,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                         accept="image/*,video/*"
                         multiple
                         onChange={handleMediaUpload}
+                        disabled={isSubmitting}
                       />
                     </label>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">Images up to 10MB, Videos up to 100MB each</p>
+                  <p className="text-sm text-gray-500 mt-1">Images up to 10MB, Videos up to 1GB each</p>
                 </div>
               </div>
 
@@ -511,7 +735,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-2">
                             <p className="text-sm font-medium text-gray-900 truncate">
@@ -520,10 +744,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             <div className="flex items-center gap-2">
                               <IconButton
                                 icon={<Star className={`h-4 w-4 ${media.featured ? 'text-yellow-500' : 'text-gray-400'}`} />}
-                                onClick={() => toggleFeaturedMedia(index)}
+                                onClick={() => toggleFeaturedMedia(media.id)}
                                 variant="text"
                                 size="sm"
                                 tooltip="Featured"
+                                disabled={isSubmitting}
+                                type="button"
                               />
                               <IconButton
                                 icon={<Trash2 className="h-4 w-4" />}
@@ -532,16 +758,19 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                                 color="red"
                                 size="sm"
                                 tooltip="Remove"
+                                disabled={isSubmitting}
+                                type="button"
                               />
                             </div>
                           </div>
-                          
+
                           <input
                             type="text"
                             placeholder="Add caption (optional)"
                             value={media.caption}
                             onChange={(e) => updateMediaCaption(index, e.target.value)}
-                            className="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isSubmitting}
                           />
                         </div>
                       </div>
@@ -555,7 +784,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
           {/* Publishing Options */}
           <div className="bg-gray-50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Publishing</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
@@ -574,6 +803,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       ]}
                       variant="outlined"
                       size="md"
+                      disabled={isSubmitting}
                     />
                   )}
                 />
@@ -584,7 +814,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                   <input
                     type="checkbox"
                     {...register('featured')}
-                    className="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+                    className="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isSubmitting}
                   />
                   <div>
                     <span className="text-sm font-medium text-gray-700">Featured Event</span>
@@ -604,7 +835,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               variant="outlined"
               color="primary"
               onClick={handleClose}
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
@@ -612,12 +843,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               type="submit"
               variant="contained"
               color="primary"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating...
+                  {isUploading ? 'Uploading...' : 'Creating...'}
                 </>
               ) : (
                 <>

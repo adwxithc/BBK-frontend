@@ -12,6 +12,7 @@ import FormInput from '@/components/ui/FormInput';
 import FormTextarea from '@/components/ui/FormTextarea';
 import ColorPicker from '@/components/ui/ColorPicker';
 import FormActions from '@/components/ui/FormActions';
+import { generateSlug } from '@/utils/string-utils';
 
 // Validation schema
 const schema = yup.object().shape({
@@ -78,17 +79,7 @@ const CreateEventCategoryModal: React.FC<CreateEventCategoryModalProps> = ({
   // Only watch color for real-time preview
   const currentColor = watch('color');
 
-  // Generate slug from text
-  const generateSlug = (text: string): string => {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+/g, '')
-      .replace(/-+$/g, '');
-  };
+
 
   // Auto-generate slug from name
   const handleAutoGenerateSlug = () => {

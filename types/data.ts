@@ -10,7 +10,7 @@ export interface IAdmin {
 export interface IResponse<T> {
     status: number;
     success: boolean;
-    data?: T;
+    data: T;
     message?: string;
 }
 export interface Ierror {
