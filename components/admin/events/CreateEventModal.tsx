@@ -196,10 +196,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   }, []);
 
   // Toggle featured media
-  const toggleFeaturedMedia = useCallback((index: number) => {
-    setMediaFiles(prev => prev.map((media, i) => ({
+  const toggleFeaturedMedia = useCallback((id: string) => {
+    setMediaFiles(prev => prev.map(media => ({
       ...media,
-      featured: i === index ? !media.featured : media.featured
+      featured: media.id === id ? !media.featured : media.featured
     })));
   }, []);
 
@@ -747,11 +747,12 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                             <div className="flex items-center gap-2">
                               <IconButton
                                 icon={<Star className={`h-4 w-4 ${media.featured ? 'text-yellow-500' : 'text-gray-400'}`} />}
-                                onClick={() => toggleFeaturedMedia(index)}
+                                onClick={() => toggleFeaturedMedia(media.id)}
                                 variant="text"
                                 size="sm"
                                 tooltip="Featured"
                                 disabled={isSubmitting}
+                                type="button"
                               />
                               <IconButton
                                 icon={<Trash2 className="h-4 w-4" />}
@@ -761,6 +762,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                                 size="sm"
                                 tooltip="Remove"
                                 disabled={isSubmitting}
+                                type="button"
                               />
                             </div>
                           </div>
