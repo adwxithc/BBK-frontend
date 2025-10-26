@@ -555,7 +555,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     registration={register('date')}
                     error={errors.date}
                     required
-                    min={new Date().toISOString().split('T')[0]}
+                    max={watch('endDate') || undefined}
                     className="bg-white"
                   />
                 </div>
@@ -568,7 +568,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
                     type="date"
                     registration={register('endDate')}
                     error={errors.endDate}
-                    min={startDate || new Date().toISOString().split('T')[0]}
+                    min={watch('date') || undefined}
                     className="bg-white"
                     helperText="Leave empty for single-day events"
                   />
